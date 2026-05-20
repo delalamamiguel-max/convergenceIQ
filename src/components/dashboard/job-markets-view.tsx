@@ -7,8 +7,9 @@ import { SignalRadar } from '@/components/charts/signal-radar';
 import { TrendLine } from '@/components/charts/trend-line';
 import {
   pmRolesUS, pmRolesAustin, pmRolesAustinSurrounding, pmRolesRemote,
-  pmMarketInsights, pmRecommendations,
+  pmMarketInsights, pmRecommendations, activeListings, jobMarketSignals,
   type PMGeoView, type PMRoleSignal, type PMMarketInsight, type PMRecommendation,
+  type ActiveListing, type JobMarketSignal,
 } from '@/lib/data/curated-datasets';
 import { useDashboardStore } from '@/lib/store';
 import { computeCompositeScore } from '@/lib/scoring-engine';
@@ -16,6 +17,7 @@ import {
   Briefcase, MapPin, Globe, Building2, TreePine, Lightbulb,
   TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp,
   Target, DollarSign, Users, AlertTriangle, CheckCircle2, Info,
+  ExternalLink, Calendar, Award, MessageSquare,
 } from 'lucide-react';
 
 const geoTabs: { key: PMGeoView; label: string; icon: typeof MapPin; desc: string }[] = [
@@ -50,10 +52,13 @@ export function JobMarketsView() {
   const [activeGeo, setActiveGeo] = useState<PMGeoView>('us');
   const [expandedRole, setExpandedRole] = useState<string | null>(null);
   const [expandedInsight, setExpandedInsight] = useState<string | null>(null);
+  const [expandedListing, setExpandedListing] = useState<string | null>(null);
 
   const roles = rolesByGeo[activeGeo];
   const insights = pmMarketInsights.filter(i => i.geoView === activeGeo);
   const recommendations = pmRecommendations.filter(r => r.geoViews.includes(activeGeo));
+  const listings = activeListings.filter(l => l.geoView === activeGeo);
+  const marketSignal = jobMarketSignals.find(s => s.geoView === activeGeo);
 
   const allSignals = useMemo(() => [...pmRolesUS, ...pmRolesAustin, ...pmRolesAustinSurrounding, ...pmRolesRemote] as PMRoleSignal[], []);
   const scores = useMemo(() => computeCompositeScore(allSignals, weights, thresholds), [allSignals, weights, thresholds]);
@@ -117,7 +122,7 @@ export function JobMarketsView() {
           return (
             <button
               key={tab.key}
-              onClick={() => { setActiveGeo(tab.key); setExpandedRole(null); setExpandedInsight(null); }}
+              onClick={() => { setActiveGeo(tab.key); setExpandedRole(null); setExpandedInsight(null); setExpandedListing(null); }}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                 active
                   ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-600 dark:text-cyan-400'
@@ -290,6 +295,100 @@ export function JobMarketsView() {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* Active Company Listings */}
+      {listings.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Building2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+            <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Active Company Listings</h3>
+            <Badge variant="outline" className="text-[10px] border-[var(--dash-border)] text-[var(--dash-text-4)]">Curated Snapshot</Badge>
+          </div>
+          <p className="text-xs text-[var(--dash-text-3)] mb-3 ml-6">
+            Companies with active PM and PM-adjacent postings relevant to your target profile. Click any listing for a relevance explanation.
+          </p>
+          <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+            {/* Table Header */}
+            <div className="grid grid-cols-[1fr_1.2fr_0.8fr_0.5fr_0.6fr_0.6fr] gap-2 px-4 py-2.5 border-b text-[10px] uppercase tracking-wide font-medium text-[var(--dash-text-4)]" style={{ borderColor: 'var(--dash-border)' }}>
+              <span>Company</span>
+              <span>Role</span>
+              <span>Location</span>
+              <span>Level</span>
+              <span>Source</span>
+              <span>Posted</span>
+            </div>
+            {/* Listing Rows */}
+            {listings.map((listing, idx) => {
+              const expanded = expandedListing === listing.id;
+              const isLast = idx === listings.length - 1;
+              return (
+                <div key={listing.id}>
+                  <div
+                    className={`grid grid-cols-[1fr_1.2fr_0.8fr_0.5fr_0.6fr_0.6fr] gap-2 px-4 py-3 cursor-pointer transition-colors hover:bg-emerald-500/5 ${!isLast && !expanded ? 'border-b' : ''}`}
+                    style={{ borderColor: 'var(--dash-border)' }}
+                    onClick={() => setExpandedListing(expanded ? null : listing.id)}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-6 h-6 rounded-md bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{listing.company.charAt(0)}</span>
+                      </div>
+                      <span className="text-xs font-semibold text-[var(--dash-text-1)] truncate">{listing.company}</span>
+                    </div>
+                    <span className="text-xs text-[var(--dash-text-2)] truncate self-center">{listing.role}</span>
+                    <div className="flex items-center gap-1 self-center min-w-0">
+                      <MapPin className="w-3 h-3 text-[var(--dash-text-4)] flex-shrink-0" />
+                      <span className="text-xs text-[var(--dash-text-3)] truncate">{listing.location}</span>
+                    </div>
+                    <span className="text-xs text-[var(--dash-text-3)] self-center">{listing.seniority}</span>
+                    <span className="text-xs text-[var(--dash-text-4)] self-center">{listing.source}</span>
+                    <div className="flex items-center gap-1 self-center">
+                      <Calendar className="w-3 h-3 text-[var(--dash-text-4)]" />
+                      <span className="text-[10px] text-[var(--dash-text-4)]">May &apos;26</span>
+                    </div>
+                  </div>
+                  {expanded && (
+                    <div className="px-4 pb-3 border-b" style={{ borderColor: 'var(--dash-border)' }}>
+                      <div className="rounded-lg p-3 bg-emerald-50 dark:bg-emerald-500/10 ml-8">
+                        <div className="text-[10px] uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Why this role is relevant</div>
+                        <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{listing.relevance}</p>
+                        <div className="flex items-center gap-4 mt-2 pt-2 border-t border-emerald-200 dark:border-emerald-500/20">
+                          <div className="flex items-center gap-1">
+                            <Award className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                            <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">{listing.seniority}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <ExternalLink className="w-3 h-3 text-[var(--dash-text-4)]" />
+                            <span className="text-[10px] text-[var(--dash-text-4)]">Found on {listing.source}</span>
+                          </div>
+                          <span className="text-[10px] text-[var(--dash-text-4)]">{listing.postedDate}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex items-start gap-2 mt-2 px-1">
+            <Info className="w-3.5 h-3.5 text-[var(--dash-text-4)] mt-0.5 flex-shrink-0" />
+            <p className="text-[10px] text-[var(--dash-text-4)] leading-relaxed">
+              Listings are curated snapshots from LinkedIn, company career pages, and job boards. Postings may have been filled or removed since last update. Always verify directly on the source before applying.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Job Market Signal */}
+      {marketSignal && (
+        <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+          <div className="flex items-center gap-2 mb-2">
+            <MessageSquare className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+            <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Job Market Signal</h3>
+            <span className="text-xs text-[var(--dash-text-4)]">— what the active postings tell us</span>
+          </div>
+          <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{marketSignal.summary}</p>
         </div>
       )}
 
