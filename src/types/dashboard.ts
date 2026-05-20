@@ -129,6 +129,73 @@ export interface DrillDownData {
   methodology?: string;
 }
 
+// Portfolio Alignment types
+export interface TickerProfile {
+  ticker: string;
+  name: string;
+  sector: string;
+  assetClass: 'stock' | 'etf' | 'fund' | 'bond-etf' | 'reit' | 'commodity';
+  themes: string[];
+  description: string;
+}
+
+export interface TickerAlignment {
+  ticker: string;
+  name: string;
+  sector: string;
+  alignmentScore: number;
+  explanation: string;
+  risks: string;
+  recommendation: 'hold' | 'review' | 'reduce' | 'add selectively' | 'research further';
+}
+
+export interface PortfolioHolding {
+  ticker: string;
+  currentAllocation: number;
+}
+
+export interface RevisedAllocation {
+  ticker: string;
+  name: string;
+  currentPct: number;
+  suggestedPct: number;
+  direction: 'increase' | 'decrease' | 'maintain';
+  reason: string;
+  supportingInsight: string;
+}
+
+export interface PortfolioSummary {
+  overallAlignment: 'broadly aligned' | 'partially aligned' | 'misaligned';
+  score: number;
+  summary: string;
+  strengths: string[];
+  gaps: string[];
+}
+
+export type AccountType = 'taxable' | 'traditional-ira' | 'roth-ira' | '401k' | 'hsa' | 'multiple' | '';
+export type TaxBracket = '10-12' | '22-24' | '32-35' | '37' | 'unsure' | '';
+export type GainStatus = 'mostly-gains' | 'mostly-losses' | 'mixed' | 'unsure' | '';
+export type GainTerm = 'short-term' | 'long-term' | 'both' | 'unsure' | '';
+
+export interface TaxContext {
+  accountType: AccountType;
+  taxBracket: TaxBracket;
+  state: string;
+  gainStatus: GainStatus;
+  gainTerm: GainTerm;
+  withdrawalPlanned: boolean | null;
+  hasLossHarvesting: boolean | null;
+  hasRestrictions: boolean | null;
+}
+
+export interface TaxImplication {
+  ticker: string;
+  investmentRationale: string;
+  taxConsiderations: string;
+  accountGuidance: string;
+  assumptions: string[];
+}
+
 // API response types
 export interface FREDResponse {
   observations: Array<{

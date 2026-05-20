@@ -10,6 +10,7 @@ import { conflictData, lobbyingData, sectorGrowthData } from '@/lib/data/curated
 import { useDashboardStore } from '@/lib/store';
 import { computeCompositeScore } from '@/lib/scoring-engine';
 import { Signal } from '@/types/dashboard';
+import { PortfolioAlignment } from './portfolio-alignment';
 import { TrendingUp, Shield, Landmark, BarChart3, Globe } from 'lucide-react';
 
 export function InvestingView() {
@@ -118,6 +119,11 @@ export function InvestingView() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {lobbyingData.map(signal => <SignalCard key={signal.id} signal={signal} onClick={setSelectedSignal} />)}
         </div>
+      </div>
+
+      {/* Portfolio Alignment */}
+      <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+        <PortfolioAlignment />
       </div>
 
       {selectedSignal && (

@@ -8,7 +8,7 @@ import { ScenarioModeler } from './scenario-modeler';
 import {
   correlationMatrix, conflictData, lobbyingData,
   disruptionData, culturalTrends, techAdoptionForecasts,
-  jobProjections, aiDisruptionData,
+  pmRolesUS, pmRolesAustin, pmRolesAustinSurrounding, pmRolesRemote,
 } from '@/lib/data/curated-datasets';
 import { computeCompositeScore } from '@/lib/scoring-engine';
 import { useDashboardStore } from '@/lib/store';
@@ -19,7 +19,7 @@ export function Overview() {
 
   const investingSignals = useMemo(() => [...conflictData, ...lobbyingData], []);
   const entrepreneurshipSignals = useMemo(() => [...disruptionData, ...culturalTrends, ...techAdoptionForecasts], []);
-  const jobSignals = useMemo(() => [...jobProjections, ...aiDisruptionData], []);
+  const jobSignals = useMemo(() => [...pmRolesUS, ...pmRolesAustin, ...pmRolesAustinSurrounding, ...pmRolesRemote], []);
 
   const investingScores = useMemo(() => computeCompositeScore(investingSignals, weights, thresholds), [investingSignals, weights, thresholds]);
   const entrepreneurshipScores = useMemo(() => computeCompositeScore(entrepreneurshipSignals, weights, thresholds), [entrepreneurshipSignals, weights, thresholds]);
