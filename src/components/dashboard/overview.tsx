@@ -65,54 +65,54 @@ export function Overview() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-[var(--dash-bg-muted)] flex items-center justify-center border border-[var(--dash-border)]">
-          <Activity className="w-5 h-5 text-[var(--dash-text-3)]" />
+        <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-[var(--dash-bg-muted)] flex items-center justify-center border border-[var(--dash-border)]">
+          <Activity className="w-5 h-5 md:w-6 md:h-6 text-[var(--dash-text-3)]" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-[var(--dash-text-1)]">Cross-Domain Intelligence Overview</h2>
-          <p className="text-xs text-[var(--dash-text-4)]">Signal confluence · Correlation analysis · Scenario modeling</p>
+          <h2 className="text-lg md:text-xl font-bold text-[var(--dash-text-1)]">Cross-Domain Intelligence Overview</h2>
+          <p className="text-sm text-[var(--dash-text-4)]">Signal confluence · Correlation analysis · Scenario modeling</p>
         </div>
       </div>
 
       {/* Domain Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
         {domainSummaries.map(summary => {
           const Icon = summary.icon;
           return (
             <div
               key={summary.domain}
-              className="rounded-xl border p-4 hover:shadow-md transition-all cursor-pointer group"
+              className="rounded-xl border p-4 md:p-5 hover:shadow-md transition-all cursor-pointer group"
               style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}
               onClick={() => setActiveDomain(summary.domain)}
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className={`w-8 h-8 rounded-lg ${summary.bgColor} flex items-center justify-center`}>
-                  <Icon className={`w-4 h-4 ${summary.color}`} />
+                <div className={`w-10 h-10 rounded-lg ${summary.bgColor} flex items-center justify-center`}>
+                  <Icon className={`w-5 h-5 ${summary.color}`} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-[var(--dash-text-1)] group-hover:text-[var(--dash-text-1)]">{summary.name}</h3>
-                  <div className="text-[10px] text-[var(--dash-text-4)]">{summary.signalCount} active signals</div>
+                  <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)] group-hover:text-[var(--dash-text-1)]">{summary.name}</h3>
+                  <div className="text-xs text-[var(--dash-text-4)]">{summary.signalCount} active signals</div>
                 </div>
-                <div className={`ml-auto text-2xl font-bold ${summary.color}`}>
+                <div className={`ml-auto text-2xl md:text-3xl font-bold ${summary.color}`}>
                   {summary.score.toFixed(0)}
                 </div>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {summary.topSectors.map((sector, i) => (
                   <div key={i} className="flex items-center justify-between">
-                    <span className="text-xs text-[var(--dash-text-3)] truncate mr-2">{sector.sector}</span>
+                    <span className="text-sm text-[var(--dash-text-3)] truncate mr-2">{sector.sector}</span>
                     <div className="flex items-center gap-2">
-                      <div className="w-24 h-1.5 rounded overflow-hidden" style={{ backgroundColor: 'var(--dash-border)' }}>
+                      <div className="w-28 h-2 rounded overflow-hidden" style={{ backgroundColor: 'var(--dash-border)' }}>
                         <div className={`h-full rounded ${summary.barColor}`} style={{ width: `${sector.score}%` }} />
                       </div>
-                      <span className="text-[10px] font-mono text-[var(--dash-text-4)] w-6 text-right">{sector.score.toFixed(0)}</span>
+                      <span className="text-xs font-mono text-[var(--dash-text-4)] w-7 text-right">{sector.score.toFixed(0)}</span>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-3 text-[10px] text-[var(--dash-text-4)] group-hover:text-[var(--dash-text-3)]">
+              <div className="mt-3 text-xs text-[var(--dash-text-4)] group-hover:text-[var(--dash-text-3)]">
                 Click to explore →
               </div>
             </div>
@@ -121,21 +121,21 @@ export function Overview() {
       </div>
 
       {/* Confluence Alerts */}
-      <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+      <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
         <div className="flex items-center gap-2 mb-4">
-          <Zap className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-          <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Signal Confluence Alerts</h3>
-          <Badge variant="outline" className="text-[10px] border-amber-500/20 text-amber-600 dark:text-amber-400">Cross-Domain</Badge>
+          <Zap className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Signal Confluence Alerts</h3>
+          <Badge variant="outline" className="text-xs border-amber-500/20 text-amber-600 dark:text-amber-400">Cross-Domain</Badge>
         </div>
         <ConfluenceAlerts />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Correlation Matrix */}
-        <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+        <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-4">
-            <GitBranch className="w-4 h-4 text-purple-500 dark:text-purple-400" />
-            <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Cross-Signal Correlations</h3>
+            <GitBranch className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Cross-Signal Correlations</h3>
           </div>
           <div className="max-h-[500px] overflow-y-auto">
             <CorrelationHeatmap data={correlationMatrix} />

@@ -22,21 +22,21 @@ export function ControlPanel() {
   ];
 
   return (
-    <div className="rounded-xl border p-4 space-y-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
-      <div className="flex items-center gap-2 text-sm font-semibold text-[var(--dash-text-1)]">
-        <Settings2 className="w-4 h-4 text-[var(--dash-text-3)]" />
+    <div className="rounded-xl border p-4 md:p-5 space-y-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+      <div className="flex items-center gap-2 text-sm md:text-base font-semibold text-[var(--dash-text-1)]">
+        <Settings2 className="w-4.5 h-4.5 text-[var(--dash-text-3)]" />
         Control Panel
       </div>
 
       {/* Presets */}
       <div>
-        <div className="text-[10px] text-[var(--dash-text-4)] mb-2 font-medium uppercase tracking-wide">Quick Presets</div>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="text-xs text-[var(--dash-text-4)] mb-2.5 font-medium uppercase tracking-wide">Quick Presets</div>
+        <div className="flex flex-wrap gap-2">
           {thresholdPresets.map(preset => (
             <button
               key={preset.id}
               onClick={() => setActivePreset(preset.id)}
-              className={`px-2.5 py-1.5 rounded-md text-xs transition-all border focus-visible:outline-2 focus-visible:outline-indigo-500 ${
+              className={`px-3 py-2 rounded-md text-sm transition-all border focus-visible:outline-2 focus-visible:outline-indigo-500 ${
                 activePreset === preset.id
                   ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border-indigo-500/30'
                   : 'text-[var(--dash-text-3)] border-[var(--dash-border)] hover:border-[var(--dash-text-4)] hover:text-[var(--dash-text-2)]'
@@ -54,16 +54,16 @@ export function ControlPanel() {
 
       {/* Weights */}
       <div>
-        <div className="text-[10px] text-[var(--dash-text-4)] mb-3 font-medium uppercase tracking-wide">Signal Weights</div>
-        <div className="space-y-3">
+        <div className="text-xs text-[var(--dash-text-4)] mb-3 font-medium uppercase tracking-wide">Signal Weights</div>
+        <div className="space-y-4">
           {categories.map(cat => (
             <div key={cat.key}>
-              <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${cat.color}`} />
-                  <span className="text-xs text-[var(--dash-text-2)]">{cat.label}</span>
+                  <div className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
+                  <span className="text-sm text-[var(--dash-text-2)]">{cat.label}</span>
                 </div>
-                <span className="text-xs font-mono text-[var(--dash-text-4)]">
+                <span className="text-sm font-mono text-[var(--dash-text-4)]">
                   {(weights[cat.key] * 100).toFixed(0)}%
                 </span>
               </div>
@@ -83,16 +83,16 @@ export function ControlPanel() {
 
       {/* Thresholds */}
       <div>
-        <div className="text-[10px] text-[var(--dash-text-4)] mb-3 font-medium uppercase tracking-wide">Minimum Thresholds</div>
-        <div className="space-y-3">
+        <div className="text-xs text-[var(--dash-text-4)] mb-3 font-medium uppercase tracking-wide">Minimum Thresholds</div>
+        <div className="space-y-4">
           {categories.map(cat => (
             <div key={cat.key}>
-              <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${cat.color}`} />
-                  <span className="text-xs text-[var(--dash-text-2)]">{cat.label}</span>
+                  <div className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
+                  <span className="text-sm text-[var(--dash-text-2)]">{cat.label}</span>
                 </div>
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-[var(--dash-border)] text-[var(--dash-text-4)]">
+                <Badge variant="outline" className="text-xs px-2 py-0.5 border-[var(--dash-border)] text-[var(--dash-text-4)]">
                   &ge;{thresholds[cat.key]}
                 </Badge>
               </div>
@@ -113,10 +113,10 @@ export function ControlPanel() {
       <Button
         variant="ghost"
         size="sm"
-        className="w-full text-xs text-[var(--dash-text-4)] hover:text-[var(--dash-text-2)]"
+        className="w-full text-sm py-2.5 text-[var(--dash-text-4)] hover:text-[var(--dash-text-2)]"
         onClick={() => setActivePreset('balanced')}
       >
-        <RotateCcw className="w-3 h-3 mr-1" />
+        <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
         Reset to Defaults
       </Button>
     </div>

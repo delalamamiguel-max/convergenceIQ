@@ -32,14 +32,14 @@ export function TrendLine({ data, color = '#6366f1', label = 'Value', showProjec
         <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
         <XAxis
           dataKey="date"
-          tick={{ fill: tickColor, fontSize: 11 }}
+          tick={{ fill: tickColor, fontSize: 12 }}
           tickFormatter={(v) => {
             const d = new Date(v);
             return `${d.toLocaleString('en', { month: 'short' })} ${d.getFullYear().toString().slice(2)}`;
           }}
           interval="preserveStartEnd"
         />
-        <YAxis tick={{ fill: tickColor, fontSize: 11 }} width={60} />
+        <YAxis tick={{ fill: tickColor, fontSize: 12 }} width={60} />
         <Tooltip
           contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: '8px' }}
           labelStyle={{ color: tooltipText }}
@@ -51,7 +51,7 @@ export function TrendLine({ data, color = '#6366f1', label = 'Value', showProjec
             x={lastActual.date}
             stroke={isDark ? '#6b7280' : '#94a3b8'}
             strokeDasharray="3 3"
-            label={{ value: 'Now', fill: tickColor, fontSize: 11 }}
+            label={{ value: 'Now', fill: tickColor, fontSize: 12 }}
           />
         )}
       </LineChart>

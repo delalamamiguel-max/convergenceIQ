@@ -35,8 +35,8 @@ export function BarRanking({ data, height = 300, layout = 'horizontal', colorSca
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={sorted} layout="vertical" margin={{ top: 5, right: 30, left: 100, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-          <XAxis type="number" tick={{ fill: tickColor, fontSize: 11 }} />
-          <YAxis dataKey="name" type="category" tick={{ fill: tickColor, fontSize: 11 }} width={95} />
+          <XAxis type="number" tick={{ fill: tickColor, fontSize: 12 }} />
+          <YAxis dataKey="name" type="category" tick={{ fill: tickColor, fontSize: 12 }} width={95} />
           <Tooltip contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: '8px' }} labelStyle={{ color: tooltipText }} itemStyle={{ color: tooltipText }} />
           <Bar dataKey="value" radius={[0, 4, 4, 0]}>
             {sorted.map((entry, index) => (
@@ -52,8 +52,8 @@ export function BarRanking({ data, height = 300, layout = 'horizontal', colorSca
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={sorted} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-        <XAxis dataKey="name" tick={{ fill: tickColor, fontSize: 10 }} angle={-35} textAnchor="end" height={70} />
-        <YAxis tick={{ fill: tickColor, fontSize: 11 }} />
+        <XAxis dataKey="name" tick={{ fill: tickColor, fontSize: 11 }} angle={-35} textAnchor="end" height={70} />
+        <YAxis tick={{ fill: tickColor, fontSize: 12 }} />
         <Tooltip contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: '8px' }} labelStyle={{ color: tooltipText }} itemStyle={{ color: tooltipText }} />
         <Bar dataKey="value" radius={[4, 4, 0, 0]}>
           {sorted.map((entry, index) => (

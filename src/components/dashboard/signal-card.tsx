@@ -38,37 +38,37 @@ export function SignalCard({ signal, onClick }: SignalCardProps) {
 
   return (
     <div
-      className="rounded-xl border p-4 hover:shadow-md transition-all cursor-pointer group"
+      className="rounded-xl border p-4 md:p-5 hover:shadow-md transition-all cursor-pointer group"
       style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}
       onClick={() => onClick?.(signal)}
     >
       <div className="flex items-start justify-between mb-3">
-        <Badge variant="outline" className={`text-[10px] ${categoryColors[signal.category]}`}>
+        <Badge variant="outline" className={`text-xs ${categoryColors[signal.category]}`}>
           {signal.category}
         </Badge>
-        <div className={`flex items-center gap-1 ${trendColor}`}>
-          <TrendIcon className="w-3.5 h-3.5" />
-          <span className="text-xs font-mono">
+        <div className={`flex items-center gap-1.5 ${trendColor}`}>
+          <TrendIcon className="w-4 h-4" />
+          <span className="text-sm font-mono">
             {signal.trendMagnitude > 0 ? '+' : ''}{signal.trendMagnitude.toFixed(1)}%
           </span>
         </div>
       </div>
 
-      <h4 className="text-sm font-medium text-[var(--dash-text-2)] mb-2 group-hover:text-[var(--dash-text-1)] transition-colors line-clamp-2">
+      <h4 className="text-sm md:text-base font-medium text-[var(--dash-text-2)] mb-2 group-hover:text-[var(--dash-text-1)] transition-colors line-clamp-2">
         {signal.label}
       </h4>
 
       <div className="flex items-end justify-between">
         <div>
-          <div className={`text-2xl font-bold ${getScoreColor(signal.value)} ring-2 ${getScoreRing(signal.value)} rounded-lg px-2 py-0.5 inline-block`}>
+          <div className={`text-2xl md:text-3xl font-bold ${getScoreColor(signal.value)} ring-2 ${getScoreRing(signal.value)} rounded-lg px-2.5 py-1 inline-block`}>
             {signal.value}
           </div>
-          <div className="text-[10px] text-[var(--dash-text-4)] mt-1">
+          <div className="text-xs text-[var(--dash-text-4)] mt-1.5">
             {signal.rawValue} {signal.unit}
           </div>
         </div>
         {signal.region && (
-          <div className="text-[10px] text-[var(--dash-text-4)] text-right">
+          <div className="text-xs text-[var(--dash-text-4)] text-right">
             {signal.region}
             {signal.sector && <><br />{signal.sector}</>}
           </div>

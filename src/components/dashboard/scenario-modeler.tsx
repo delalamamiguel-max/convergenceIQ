@@ -41,14 +41,14 @@ export function ScenarioModeler() {
   const reset = () => { setOverrides({}); setEffects([]); };
 
   return (
-    <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+    <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2 text-sm font-semibold text-[var(--dash-text-1)]">
-          <Beaker className="w-4 h-4 text-purple-500 dark:text-purple-400" />
+        <div className="flex items-center gap-2 text-sm md:text-base font-semibold text-[var(--dash-text-1)]">
+          <Beaker className="w-5 h-5 text-purple-500 dark:text-purple-400" />
           Scenario Modeler
         </div>
-        <Button variant="ghost" size="sm" onClick={reset} className="text-xs text-[var(--dash-text-4)] hover:text-[var(--dash-text-2)]">
-          <RotateCcw className="w-3 h-3 mr-1" />
+        <Button variant="ghost" size="sm" onClick={reset} className="text-sm text-[var(--dash-text-4)] hover:text-[var(--dash-text-2)]">
+          <RotateCcw className="w-3.5 h-3.5 mr-1" />
           Reset
         </Button>
       </div>
@@ -61,7 +61,7 @@ export function ScenarioModeler() {
           return (
             <div key={variable.id} className={`p-3 rounded-lg border ${categoryBorder[variable.category]} transition-colors`} style={{ backgroundColor: 'var(--dash-bg-muted)' }}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-[var(--dash-text-2)]">{variable.label}</span>
+                <span className="text-sm text-[var(--dash-text-2)]">{variable.label}</span>
                 <span className={`text-xs font-mono ${changed ? 'text-purple-500 dark:text-purple-400' : 'text-[var(--dash-text-4)]'}`}>
                   {value}{variable.unit === '%' ? '%' : ` ${variable.unit}`}
                 </span>
@@ -74,8 +74,8 @@ export function ScenarioModeler() {
                 step={variable.step}
               />
               <div className="flex justify-between mt-1">
-                <span className="text-[10px] text-[var(--dash-text-4)]">{variable.min}</span>
-                <span className="text-[10px] text-[var(--dash-text-4)]">{variable.max}</span>
+                <span className="text-xs text-[var(--dash-text-4)]">{variable.min}</span>
+                <span className="text-xs text-[var(--dash-text-4)]">{variable.max}</span>
               </div>
             </div>
           );
@@ -85,21 +85,22 @@ export function ScenarioModeler() {
       {effects.length > 0 && (
         <div>
           <div className="text-xs text-[var(--dash-text-4)] font-medium mb-3 uppercase tracking-wide">Cascade Effects</div>
+
           <div className="space-y-2 max-h-[400px] overflow-y-auto">
             {effects.sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent)).map((effect, i) => (
               <div key={i} className="flex items-center gap-3 p-2 rounded-lg border transition-colors" style={{ backgroundColor: 'var(--dash-bg-muted)', borderColor: 'var(--dash-border)' }}>
-                <Badge variant="outline" className={`text-[10px] ${domainColors[effect.targetDomain]}`}>
+                <Badge variant="outline" className={`text-xs ${domainColors[effect.targetDomain]}`}>
                   {effect.targetDomain === 'investing' ? 'INV' : effect.targetDomain === 'entrepreneurship' ? 'ENT' : 'JOB'}
                 </Badge>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs text-[var(--dash-text-2)] truncate">{effect.targetSector}</div>
-                  <div className="text-[10px] text-[var(--dash-text-4)]">{effect.metric}</div>
+                  <div className="text-xs text-[var(--dash-text-4)]">{effect.metric}</div>
                 </div>
                 <ArrowRight className="w-3 h-3 text-[var(--dash-text-4)] flex-shrink-0" />
                 <div className={`text-sm font-mono font-bold ${effect.changePercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
                   {effect.changePercent >= 0 ? '+' : ''}{effect.changePercent.toFixed(1)}%
                 </div>
-                <div className="text-[10px] text-[var(--dash-text-4)] w-10 text-right">{(effect.confidence * 100).toFixed(0)}%</div>
+                <div className="text-xs text-[var(--dash-text-4)] w-10 text-right">{(effect.confidence * 100).toFixed(0)}%</div>
               </div>
             ))}
           </div>

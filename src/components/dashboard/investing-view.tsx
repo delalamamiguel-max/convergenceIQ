@@ -45,22 +45,22 @@ export function InvestingView() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-          <TrendingUp className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+        <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+          <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-indigo-500 dark:text-indigo-400" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-[var(--dash-text-1)]">Investing Intelligence</h2>
-          <p className="text-xs text-[var(--dash-text-4)]">Conflict data · Lobbying analysis · Sector growth · Regulatory shifts · Sentiment</p>
+          <h2 className="text-lg md:text-xl font-bold text-[var(--dash-text-1)]">Investing Intelligence</h2>
+          <p className="text-sm text-[var(--dash-text-4)]">Conflict data · Lobbying analysis · Sector growth · Regulatory shifts · Sentiment</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {scores.slice(0, 4).map((score, i) => (
-          <div key={i} className="rounded-xl border p-3 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
-            <div className="text-[10px] text-[var(--dash-text-4)] mb-1">{score.sector}</div>
+          <div key={i} className="rounded-xl border p-3 md:p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+            <div className="text-xs text-[var(--dash-text-4)] mb-1">{score.sector}</div>
             <div className="flex items-end justify-between">
-              <div className="text-2xl font-bold text-indigo-500 dark:text-indigo-400">{score.score.toFixed(0)}</div>
-              <div className="text-[10px] text-[var(--dash-text-4)]">{score.region}</div>
+              <div className="text-2xl md:text-3xl font-bold text-indigo-500 dark:text-indigo-400">{score.score.toFixed(0)}</div>
+              <div className="text-xs text-[var(--dash-text-4)]">{score.region}</div>
             </div>
             <div className="flex gap-1 mt-2">
               <div className="h-1 flex-1 rounded bg-emerald-500/30" style={{ opacity: score.breakdown.ethical / 100 }} />
@@ -73,50 +73,50 @@ export function InvestingView() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+        <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-4">
-            <BarChart3 className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-            <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Sector Performance (YTD %)</h3>
+            <BarChart3 className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Sector Performance (YTD %)</h3>
           </div>
           <BarRanking data={sectorChartData} height={320} colorScale={false} />
         </div>
 
-        <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+        <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-4">
-            <Globe className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-            <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Multi-Factor Signal Overview</h3>
+            <Globe className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Multi-Factor Signal Overview</h3>
           </div>
           <SignalRadar data={radarData} color="#818cf8" />
         </div>
       </div>
 
-      <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+      <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
         <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-          <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Market Trend (S&P 500 proxy)</h3>
-          <Badge variant="outline" className="text-[10px] border-[var(--dash-border)] text-[var(--dash-text-4)]">FRED / Alpha Vantage</Badge>
+          <TrendingUp className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Market Trend (S&P 500 proxy)</h3>
+          <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">FRED / Alpha Vantage</Badge>
         </div>
         <TrendLine data={histData} color="#818cf8" label="S&P 500" />
       </div>
 
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Shield className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-          <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Conflict & Geopolitical Signals</h3>
-          <Badge variant="outline" className="text-[10px] border-[var(--dash-border)] text-[var(--dash-text-4)]">ACLED</Badge>
+          <Shield className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Conflict & Geopolitical Signals</h3>
+          <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">ACLED</Badge>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {conflictData.map(signal => <SignalCard key={signal.id} signal={signal} onClick={setSelectedSignal} />)}
         </div>
       </div>
 
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Landmark className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-          <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Lobbying & Regulatory Influence</h3>
-          <Badge variant="outline" className="text-[10px] border-[var(--dash-border)] text-[var(--dash-text-4)]">OpenSecrets</Badge>
+          <Landmark className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Lobbying & Regulatory Influence</h3>
+          <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">OpenSecrets</Badge>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {lobbyingData.map(signal => <SignalCard key={signal.id} signal={signal} onClick={setSelectedSignal} />)}
         </div>
       </div>

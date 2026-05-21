@@ -105,12 +105,12 @@ export function JobMarketsView() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
-          <Briefcase className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />
+        <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+          <Briefcase className="w-5 h-5 md:w-6 md:h-6 text-cyan-500 dark:text-cyan-400" />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-[var(--dash-text-1)]">Product Management Job Market</h2>
-          <p className="text-xs text-[var(--dash-text-4)]">PM roles · AI PM · Technical PM · Growth PM · Product Ops · Geographic analysis</p>
+          <h2 className="text-lg md:text-xl font-bold text-[var(--dash-text-1)]">Product Management Job Market</h2>
+          <p className="text-sm text-[var(--dash-text-4)]">PM roles · AI PM · Technical PM · Growth PM · Product Ops · Geographic analysis</p>
         </div>
       </div>
 
@@ -123,14 +123,14 @@ export function JobMarketsView() {
             <button
               key={tab.key}
               onClick={() => { setActiveGeo(tab.key); setExpandedRole(null); setExpandedInsight(null); setExpandedListing(null); }}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 px-4 py-2.5 md:px-5 md:py-3 rounded-xl border text-sm md:text-base font-medium transition-all ${
                 active
                   ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-600 dark:text-cyan-400'
                   : 'border-[var(--dash-border)] text-[var(--dash-text-3)] hover:text-[var(--dash-text-2)] hover:border-[var(--dash-text-4)]'
               }`}
               style={!active ? { backgroundColor: 'var(--dash-bg-card)' } : undefined}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-4 h-4 md:w-5 md:h-5" />
               {tab.label}
             </button>
           );
@@ -138,12 +138,12 @@ export function JobMarketsView() {
       </div>
 
       {/* Geo Description */}
-      <div className="text-xs text-[var(--dash-text-4)] -mt-2">
+      <div className="text-sm text-[var(--dash-text-4)] -mt-2">
         {geoTabs.find(t => t.key === activeGeo)?.desc}
       </div>
 
       {/* Summary Stats Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard
           icon={<Users className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />}
           label="Total PM Openings"
@@ -171,13 +171,13 @@ export function JobMarketsView() {
       </div>
 
       {/* PM Demand Trend */}
-      <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+      <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
         <div className="flex items-center gap-2 mb-2">
           <TrendingUp className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-          <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">PM Role Demand Over Time</h3>
-          <Badge variant="outline" className="text-[10px] border-[var(--dash-border)] text-[var(--dash-text-4)]">LinkedIn / BLS</Badge>
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">PM Role Demand Over Time</h3>
+          <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">LinkedIn / BLS</Badge>
         </div>
-        <p className="text-xs text-[var(--dash-text-3)] mb-3">
+        <p className="text-sm text-[var(--dash-text-3)] mb-3">
           This chart tracks the total number of open PM roles in this geography over the past 3 years, with a 12-month projection.
           An upward trend means companies are creating new PM positions faster than they are filling them — a sign of sustained demand.
         </p>
@@ -186,26 +186,26 @@ export function JobMarketsView() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+        <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-            <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Growth Rate by PM Role (%)</h3>
-            <Badge variant="outline" className="text-[10px] border-[var(--dash-border)] text-[var(--dash-text-4)]">BLS Projected</Badge>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Growth Rate by PM Role (%)</h3>
+            <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">BLS Projected</Badge>
           </div>
-          <p className="text-xs text-[var(--dash-text-3)] mb-3">
+          <p className="text-sm text-[var(--dash-text-3)] mb-3">
             Projected job growth over the next decade. Roles above 15% are growing significantly faster than the economy overall (7% average).
             Higher growth means more openings, more company options, and stronger negotiating position.
           </p>
           <BarRanking data={growthChart} layout="vertical" height={Math.max(280, roles.length * 45)} />
         </div>
 
-        <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+        <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="w-4 h-4 text-green-500 dark:text-green-400" />
-            <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Median Salary by Role ($K)</h3>
-            <Badge variant="outline" className="text-[10px] border-[var(--dash-border)] text-[var(--dash-text-4)]">LinkedIn / Glassdoor</Badge>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Median Salary by Role ($K)</h3>
+            <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">LinkedIn / Glassdoor</Badge>
           </div>
-          <p className="text-xs text-[var(--dash-text-3)] mb-3">
+          <p className="text-sm text-[var(--dash-text-3)] mb-3">
             Median base salary in thousands. This is the midpoint — half of people in each role earn more, half earn less.
             Use this to benchmark offers and understand the salary premium for specialization.
           </p>
@@ -216,12 +216,12 @@ export function JobMarketsView() {
       {/* Open Roles + Radar */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {openRolesChart.length > 0 && (
-          <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+          <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
             <div className="flex items-center gap-2 mb-2">
               <Users className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-              <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Open Roles by Specialty</h3>
+              <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Open Roles by Specialty</h3>
             </div>
-            <p className="text-xs text-[var(--dash-text-3)] mb-3">
+            <p className="text-sm text-[var(--dash-text-3)] mb-3">
               Current open PM job postings. Higher volume means more chances to apply and interview.
               Low-volume specialties require more targeted, fewer-but-higher-quality applications.
             </p>
@@ -229,12 +229,12 @@ export function JobMarketsView() {
           </div>
         )}
 
-        <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+        <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <Target className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-            <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">PM Market Multi-Factor Analysis</h3>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">PM Market Multi-Factor Analysis</h3>
           </div>
-          <p className="text-xs text-[var(--dash-text-3)] mb-3">
+          <p className="text-sm text-[var(--dash-text-3)] mb-3">
             How the PM job market scores across four dimensions. Technological is strongest because PM growth is driven by AI and platform expansion.
             Cultural reflects remote-work and work-preference trends affecting PM roles.
           </p>
@@ -247,7 +247,7 @@ export function JobMarketsView() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Lightbulb className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-            <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Key Market Insights</h3>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Key Market Insights</h3>
             <span className="text-xs text-[var(--dash-text-4)]">— what the data means and why it matters</span>
           </div>
           <div className="space-y-3">
@@ -266,7 +266,7 @@ export function JobMarketsView() {
                     <SevIcon className={`w-5 h-5 mt-0.5 flex-shrink-0 ${config.color}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm font-semibold text-[var(--dash-text-1)]">{insight.title}</h4>
+                        <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{insight.title}</h4>
                         {expanded ? <ChevronUp className="w-4 h-4 text-[var(--dash-text-4)]" /> : <ChevronDown className="w-4 h-4 text-[var(--dash-text-4)]" />}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
@@ -276,16 +276,16 @@ export function JobMarketsView() {
                       {expanded && (
                         <div className="mt-3 space-y-3">
                           <div>
-                            <div className="text-[10px] uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">What this means</div>
-                            <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{insight.explanation}</p>
+                            <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">What this means</div>
+                            <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{insight.explanation}</p>
                           </div>
                           <div>
-                            <div className="text-[10px] uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Why it matters for you</div>
-                            <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{insight.whyItMatters}</p>
+                            <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Why it matters for you</div>
+                            <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{insight.whyItMatters}</p>
                           </div>
-                          <div className={`rounded-lg p-3 ${config.bg}`}>
-                            <div className="text-[10px] uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Recommended action</div>
-                            <p className={`text-xs font-medium ${config.color}`}>{insight.recommendedAction}</p>
+                          <div className={`rounded-lg p-3 md:p-4 ${config.bg}`}>
+                            <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Recommended action</div>
+                            <p className={`text-sm font-medium ${config.color}`}>{insight.recommendedAction}</p>
                           </div>
                         </div>
                       )}
@@ -302,16 +302,16 @@ export function JobMarketsView() {
       {listings.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Building2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-            <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Active Company Listings</h3>
-            <Badge variant="outline" className="text-[10px] border-[var(--dash-border)] text-[var(--dash-text-4)]">Curated Snapshot</Badge>
+            <Building2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Active Company Listings</h3>
+            <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">Curated Snapshot</Badge>
           </div>
-          <p className="text-xs text-[var(--dash-text-3)] mb-3 ml-6">
+          <p className="text-sm text-[var(--dash-text-3)] mb-3 ml-7">
             Companies with active PM and PM-adjacent postings relevant to your target profile. Click any listing for a relevance explanation.
           </p>
           <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
-            {/* Table Header */}
-            <div className="grid grid-cols-[1fr_1.2fr_0.8fr_0.5fr_0.6fr_0.6fr] gap-2 px-4 py-2.5 border-b text-[10px] uppercase tracking-wide font-medium text-[var(--dash-text-4)]" style={{ borderColor: 'var(--dash-border)' }}>
+            {/* Table Header — hidden on mobile */}
+            <div className="hidden md:grid grid-cols-[1fr_1.2fr_0.8fr_0.5fr_0.6fr_0.6fr] gap-2 px-4 py-3 border-b text-xs uppercase tracking-wide font-medium text-[var(--dash-text-4)]" style={{ borderColor: 'var(--dash-border)' }}>
               <span>Company</span>
               <span>Role</span>
               <span>Location</span>
@@ -325,51 +325,73 @@ export function JobMarketsView() {
               const isLast = idx === listings.length - 1;
               return (
                 <div key={listing.id}>
+                  {/* Desktop row */}
                   <div
-                    className={`grid grid-cols-[1fr_1.2fr_0.8fr_0.5fr_0.6fr_0.6fr] gap-2 px-4 py-3 cursor-pointer transition-colors hover:bg-emerald-500/5 ${!isLast && !expanded ? 'border-b' : ''}`}
+                    className={`hidden md:grid grid-cols-[1fr_1.2fr_0.8fr_0.5fr_0.6fr_0.6fr] gap-2 px-4 py-3.5 cursor-pointer transition-colors hover:bg-emerald-500/5 ${!isLast && !expanded ? 'border-b' : ''}`}
                     style={{ borderColor: 'var(--dash-border)' }}
                     onClick={() => setExpandedListing(expanded ? null : listing.id)}
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-6 h-6 rounded-md bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{listing.company.charAt(0)}</span>
+                      <div className="w-7 h-7 rounded-md bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{listing.company.charAt(0)}</span>
                       </div>
-                      <span className="text-xs font-semibold text-[var(--dash-text-1)] truncate">{listing.company}</span>
+                      <span className="text-sm font-semibold text-[var(--dash-text-1)] truncate">{listing.company}</span>
                     </div>
-                    <span className="text-xs text-[var(--dash-text-2)] truncate self-center">{listing.role}</span>
-                    <div className="flex items-center gap-1 self-center min-w-0">
-                      <MapPin className="w-3 h-3 text-[var(--dash-text-4)] flex-shrink-0" />
-                      <span className="text-xs text-[var(--dash-text-3)] truncate">{listing.location}</span>
+                    <span className="text-sm text-[var(--dash-text-2)] truncate self-center">{listing.role}</span>
+                    <div className="flex items-center gap-1.5 self-center min-w-0">
+                      <MapPin className="w-3.5 h-3.5 text-[var(--dash-text-4)] flex-shrink-0" />
+                      <span className="text-sm text-[var(--dash-text-3)] truncate">{listing.location}</span>
                     </div>
-                    <span className="text-xs text-[var(--dash-text-3)] self-center">{listing.seniority}</span>
-                    <span className="text-xs text-[var(--dash-text-4)] self-center">{listing.source}</span>
+                    <span className="text-sm text-[var(--dash-text-3)] self-center">{listing.seniority}</span>
+                    <span className="text-sm text-[var(--dash-text-4)] self-center">{listing.source}</span>
                     <div className="flex items-center gap-1 self-center">
-                      <Calendar className="w-3 h-3 text-[var(--dash-text-4)]" />
-                      <span className="text-[10px] text-[var(--dash-text-4)]">May &apos;26</span>
+                      <Calendar className="w-3.5 h-3.5 text-[var(--dash-text-4)]" />
+                      <span className="text-xs text-[var(--dash-text-4)]">May &apos;26</span>
+                    </div>
+                  </div>
+                  {/* Mobile card */}
+                  <div
+                    className={`md:hidden px-4 py-3.5 cursor-pointer transition-colors hover:bg-emerald-500/5 ${!isLast && !expanded ? 'border-b' : ''}`}
+                    style={{ borderColor: 'var(--dash-border)' }}
+                    onClick={() => setExpandedListing(expanded ? null : listing.id)}
+                  >
+                    <div className="flex items-center gap-2.5 mb-1.5">
+                      <div className="w-8 h-8 rounded-md bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{listing.company.charAt(0)}</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-semibold text-[var(--dash-text-1)] truncate">{listing.company}</div>
+                        <div className="text-sm text-[var(--dash-text-2)] truncate">{listing.role}</div>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 ml-10.5 text-xs text-[var(--dash-text-4)]">
+                      <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{listing.location}</span>
+                      <span>{listing.seniority}</span>
+                      <span>{listing.source}</span>
                     </div>
                   </div>
                   {expanded && (
                     <div className="px-4 pb-3 border-b" style={{ borderColor: 'var(--dash-border)' }}>
-                      <div className="rounded-lg p-3 bg-emerald-50 dark:bg-emerald-500/10 ml-8">
-                        <div className="text-[10px] uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Why this role is relevant</div>
-                        <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{listing.relevance}</p>
-                        <div className="flex items-center gap-4 mt-2 pt-2 border-t border-emerald-200 dark:border-emerald-500/20">
+                      <div className="rounded-lg p-3 md:p-4 bg-emerald-50 dark:bg-emerald-500/10 md:ml-8">
+                        <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1.5">Why this role is relevant</div>
+                        <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{listing.relevance}</p>
+                        <div className="flex flex-wrap items-center gap-3 mt-2.5 pt-2.5 border-t border-emerald-200 dark:border-emerald-500/20">
                           <a
                             href={listing.url}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}
-                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-600 dark:bg-emerald-500 text-white text-[10px] font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors"
+                            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-emerald-600 dark:bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors"
                           >
-                            <ExternalLink className="w-3 h-3" />
+                            <ExternalLink className="w-3.5 h-3.5" />
                             View Posting
                           </a>
                           <div className="flex items-center gap-1">
-                            <Award className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                            <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">{listing.seniority}</span>
+                            <Award className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{listing.seniority}</span>
                           </div>
-                          <span className="text-[10px] text-[var(--dash-text-4)]">Found on {listing.source}</span>
-                          <span className="text-[10px] text-[var(--dash-text-4)]">{listing.postedDate}</span>
+                          <span className="text-xs text-[var(--dash-text-4)]">Found on {listing.source}</span>
+                          <span className="text-xs text-[var(--dash-text-4)]">{listing.postedDate}</span>
                         </div>
                       </div>
                     </div>
@@ -378,9 +400,9 @@ export function JobMarketsView() {
               );
             })}
           </div>
-          <div className="flex items-start gap-2 mt-2 px-1">
-            <Info className="w-3.5 h-3.5 text-[var(--dash-text-4)] mt-0.5 flex-shrink-0" />
-            <p className="text-[10px] text-[var(--dash-text-4)] leading-relaxed">
+          <div className="flex items-start gap-2 mt-2.5 px-1">
+            <Info className="w-4 h-4 text-[var(--dash-text-4)] mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-[var(--dash-text-4)] leading-relaxed">
               Listings are curated snapshots from LinkedIn, company career pages, and job boards. Postings may have been filled or removed since last update. Always verify directly on the source before applying.
             </p>
           </div>
@@ -389,10 +411,10 @@ export function JobMarketsView() {
 
       {/* Job Market Signal */}
       {marketSignal && (
-        <div className="rounded-xl border p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+        <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <MessageSquare className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-            <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Job Market Signal</h3>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Job Market Signal</h3>
             <span className="text-xs text-[var(--dash-text-4)]">— what the active postings tell us</span>
           </div>
           <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{marketSignal.summary}</p>
@@ -403,7 +425,7 @@ export function JobMarketsView() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Briefcase className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-          <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">PM Role Breakdown</h3>
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">PM Role Breakdown</h3>
           <span className="text-xs text-[var(--dash-text-4)]">— click any role for full analysis</span>
         </div>
         <div className="space-y-3">
@@ -425,42 +447,42 @@ export function JobMarketsView() {
                 onClick={() => setExpandedRole(expanded ? null : role.id)}
               >
                 {/* Collapsed Header */}
-                <div className="p-4 flex items-center gap-4">
-                  <div className="text-2xl font-bold text-cyan-500 dark:text-cyan-400 w-12 text-center">{role.value}</div>
+                <div className="p-4 md:p-5 flex items-center gap-4">
+                  <div className="text-2xl md:text-3xl font-bold text-cyan-500 dark:text-cyan-400 w-12 md:w-14 text-center">{role.value}</div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-semibold text-[var(--dash-text-1)] truncate">{role.label}</h4>
-                    <div className="flex items-center gap-3 mt-1">
-                      {role.medianSalary && <span className="text-xs text-[var(--dash-text-3)]">${role.medianSalary.toLocaleString()}</span>}
-                      {role.openRoles && <span className="text-xs text-[var(--dash-text-4)]">{role.openRoles.toLocaleString()} openings</span>}
+                    <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)] truncate">{role.label}</h4>
+                    <div className="flex flex-wrap items-center gap-3 mt-1">
+                      {role.medianSalary && <span className="text-sm text-[var(--dash-text-3)]">${role.medianSalary.toLocaleString()}</span>}
+                      {role.openRoles && <span className="text-sm text-[var(--dash-text-4)]">{role.openRoles.toLocaleString()} openings</span>}
                       {role.demandTrend && (
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium capitalize ${demandColor}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${demandColor}`}>
                           {role.demandTrend}
                         </span>
                       )}
                     </div>
                   </div>
                   <div className={`flex items-center gap-1 ${trendColor}`}>
-                    <TrendIcon className="w-4 h-4" />
-                    <span className="text-sm font-mono font-bold">{role.rawValue}%</span>
+                    <TrendIcon className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="text-sm md:text-base font-mono font-bold">{role.rawValue}%</span>
                   </div>
-                  {expanded ? <ChevronUp className="w-4 h-4 text-[var(--dash-text-4)]" /> : <ChevronDown className="w-4 h-4 text-[var(--dash-text-4)]" />}
+                  {expanded ? <ChevronUp className="w-5 h-5 text-[var(--dash-text-4)]" /> : <ChevronDown className="w-5 h-5 text-[var(--dash-text-4)]" />}
                 </div>
 
                 {/* Expanded Detail */}
                 {expanded && (
-                  <div className="px-4 pb-4 border-t border-[var(--dash-border)]">
+                  <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-[var(--dash-border)]">
                     <div className="mt-4 space-y-3">
                       <div>
-                        <div className="text-[10px] uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">What this means</div>
-                        <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{role.explanation}</p>
+                        <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">What this means</div>
+                        <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{role.explanation}</p>
                       </div>
                       <div>
-                        <div className="text-[10px] uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Why it matters for you</div>
-                        <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{role.whyItMatters}</p>
+                        <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Why it matters for you</div>
+                        <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{role.whyItMatters}</p>
                       </div>
-                      <div className="rounded-lg p-3 bg-cyan-50 dark:bg-cyan-500/10">
-                        <div className="text-[10px] uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Recommended action</div>
-                        <p className="text-xs font-medium text-cyan-700 dark:text-cyan-300">{role.recommendedAction}</p>
+                      <div className="rounded-lg p-3 md:p-4 bg-cyan-50 dark:bg-cyan-500/10">
+                        <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Recommended action</div>
+                        <p className="text-sm font-medium text-cyan-700 dark:text-cyan-300">{role.recommendedAction}</p>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
                         <MiniStat label="Growth Rate" value={`${role.rawValue}%`} sub="10yr projected" />
@@ -482,7 +504,7 @@ export function JobMarketsView() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Target className="w-4 h-4 text-green-500 dark:text-green-400" />
-            <h3 className="text-sm font-semibold text-[var(--dash-text-1)]">Recommendations</h3>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Recommendations</h3>
             <span className="text-xs text-[var(--dash-text-4)]">— what to do with this information</span>
           </div>
           <div className="space-y-3">
@@ -500,10 +522,10 @@ export function JobMarketsView() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="text-sm font-semibold text-[var(--dash-text-1)]">{rec.title}</h4>
-                        <Badge variant="outline" className={`text-[10px] ${cat.color}`}>{cat.label}</Badge>
+                        <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{rec.title}</h4>
+                        <Badge variant="outline" className={`text-xs ${cat.color}`}>{cat.label}</Badge>
                       </div>
-                      <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{rec.body}</p>
+                      <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{rec.body}</p>
                     </div>
                   </div>
                 </div>
@@ -518,13 +540,13 @@ export function JobMarketsView() {
 
 function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string; sub: string }) {
   return (
-    <div className="rounded-xl border p-3 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
-      <div className="flex items-center gap-1.5 mb-1">
+    <div className="rounded-xl border p-3 md:p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+      <div className="flex items-center gap-2 mb-1.5">
         {icon}
-        <span className="text-[10px] text-[var(--dash-text-4)]">{label}</span>
+        <span className="text-xs text-[var(--dash-text-4)]">{label}</span>
       </div>
-      <div className="text-lg font-bold text-[var(--dash-text-1)]">{value}</div>
-      <div className="text-[10px] text-[var(--dash-text-4)]">{sub}</div>
+      <div className="text-lg md:text-xl font-bold text-[var(--dash-text-1)]">{value}</div>
+      <div className="text-xs text-[var(--dash-text-4)]">{sub}</div>
     </div>
   );
 }
@@ -532,9 +554,9 @@ function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: s
 function MiniStat({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div>
-      <div className="text-[10px] text-[var(--dash-text-4)]">{label}</div>
-      <div className="text-sm font-bold text-[var(--dash-text-1)]">{value}</div>
-      <div className="text-[10px] text-[var(--dash-text-4)]">{sub}</div>
+      <div className="text-xs text-[var(--dash-text-4)]">{label}</div>
+      <div className="text-sm md:text-base font-bold text-[var(--dash-text-1)]">{value}</div>
+      <div className="text-xs text-[var(--dash-text-4)]">{sub}</div>
     </div>
   );
 }

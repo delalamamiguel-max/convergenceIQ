@@ -29,14 +29,14 @@ export function CorrelationHeatmap({ data }: CorrelationHeatmapProps) {
           <TooltipTrigger>
             <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[var(--dash-bg-muted)] transition-colors cursor-pointer text-left w-full">
               <div className="flex-1 min-w-0">
-                <div className="text-xs text-[var(--dash-text-3)] truncate">{entry.source}</div>
-                <div className="text-[10px] text-[var(--dash-text-4)]">→</div>
-                <div className="text-xs text-[var(--dash-text-3)] truncate">{entry.target}</div>
+                <div className="text-sm text-[var(--dash-text-3)] truncate">{entry.source}</div>
+                <div className="text-xs text-[var(--dash-text-4)]">→</div>
+                <div className="text-sm text-[var(--dash-text-3)] truncate">{entry.target}</div>
               </div>
-              <div className={`w-16 h-10 rounded flex items-center justify-center font-mono text-sm font-bold ${correlationBg(entry.correlation)} ${correlationTextColor(entry.correlation)}`}>
+              <div className={`w-16 h-10 md:w-18 md:h-11 rounded flex items-center justify-center font-mono text-sm font-bold ${correlationBg(entry.correlation)} ${correlationTextColor(entry.correlation)}`}>
                 {entry.correlation > 0 ? '+' : ''}{entry.correlation.toFixed(2)}
               </div>
-              <div className="text-[10px] text-[var(--dash-text-4)] w-12 text-right flex-shrink-0">
+              <div className="text-xs text-[var(--dash-text-4)] w-12 text-right flex-shrink-0">
                 {entry.lag}mo lag
               </div>
             </div>
