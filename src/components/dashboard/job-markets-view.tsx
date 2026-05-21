@@ -354,14 +354,21 @@ export function JobMarketsView() {
                         <div className="text-[10px] uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Why this role is relevant</div>
                         <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{listing.relevance}</p>
                         <div className="flex items-center gap-4 mt-2 pt-2 border-t border-emerald-200 dark:border-emerald-500/20">
+                          <a
+                            href={listing.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-600 dark:bg-emerald-500 text-white text-[10px] font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            View Posting
+                          </a>
                           <div className="flex items-center gap-1">
                             <Award className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                             <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">{listing.seniority}</span>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <ExternalLink className="w-3 h-3 text-[var(--dash-text-4)]" />
-                            <span className="text-[10px] text-[var(--dash-text-4)]">Found on {listing.source}</span>
-                          </div>
+                          <span className="text-[10px] text-[var(--dash-text-4)]">Found on {listing.source}</span>
                           <span className="text-[10px] text-[var(--dash-text-4)]">{listing.postedDate}</span>
                         </div>
                       </div>
