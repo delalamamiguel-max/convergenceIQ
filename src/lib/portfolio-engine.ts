@@ -1,8 +1,24 @@
 import {
-  TickerProfile, TickerAlignment, PortfolioHolding,
-  RevisedAllocation, PortfolioSummary, TaxContext, TaxImplication,
+  TickerProfile, TickerAlignment, PortfolioHolding, PortfolioValuation, HoldingValuation,
+  RevisedAllocation, RevisedAction, PortfolioSummary, TaxContext, TaxImplication,
 } from '@/types/dashboard';
 import { sectorGrowthData } from '@/lib/data/curated-datasets';
+
+const tickerPrices: Record<string, number> = {
+  AAPL: 198.50, MSFT: 430.25, GOOGL: 178.60, GOOG: 179.10, AMZN: 189.30,
+  NVDA: 131.40, META: 510.75, TSLA: 248.90, TSM: 172.50, AMD: 164.80,
+  AVGO: 185.20, CRM: 298.40, ORCL: 145.60, JPM: 205.30, V: 285.70,
+  JNJ: 155.80, UNH: 520.40, LLY: 810.50, PG: 168.20, KO: 62.40,
+  XOM: 108.50, CVX: 152.30, BA: 195.60, LMT: 465.80, DIS: 112.40,
+  NFLX: 685.20, PLTR: 24.80, COIN: 225.40, SNOW: 165.30, NET: 98.60,
+  CRWD: 365.40, PANW: 320.10, SHOP: 78.90, SQ: 72.50, SOFI: 10.20,
+  ENPH: 128.40, NEE: 78.50, O: 56.80,
+  VTI: 262.50, VOO: 495.80, SPY: 538.60, QQQ: 478.90, ARKK: 52.30,
+  ARKG: 32.10, VGT: 565.40, SCHD: 82.60, VYM: 118.40, VXUS: 60.20,
+  VWO: 44.30, BND: 72.80, AGG: 100.40, TLT: 92.50, GLD: 215.60,
+  IBIT: 38.90, XLK: 210.30, XLF: 42.80, XLE: 85.60, XLV: 148.20,
+  ICLN: 14.80, SMH: 248.60, HACK: 68.40, BOTZ: 32.50,
+};
 
 // Known ticker database — covers common holdings a retail investor might have
 const tickerDb: Record<string, TickerProfile> = {
@@ -222,6 +238,45 @@ export function lookupTicker(ticker: string): TickerProfile | null {
   return tickerDb[ticker.toUpperCase()] || null;
 }
 
+export function getTickerPrice(ticker: string): number | null {
+  return tickerPrices[ticker.toUpperCase()] ?? null;
+}
+
+export function computePortfolioValuation(holdings: PortfolioHolding[]): PortfolioValuation {
+  const valued: HoldingValuation[] = holdings.map(h => {
+    const t = h.ticker.toUpperCase();
+    const profile = tickerDb[t];
+    const price = tickerPrices[t] ?? 0;
+    const marketValue = h.shares * price;
+    const gainLoss = h.costBasis != null ? (price - h.costBasis) * h.shares : null;
+    const gainLossPct = h.costBasis != null && h.costBasis > 0 ? ((price - h.costBasis) / h.costBasis) * 100 : null;
+    return {
+      ticker: t,
+      name: profile?.name ?? `${t} (Unknown)`,
+      shares: h.shares,
+      costBasis: h.costBasis ?? null,
+      currentPrice: price,
+      marketValue,
+      allocationPct: 0,
+      gainLoss,
+      gainLossPct,
+    };
+  });
+
+  const totalValue = valued.reduce((s, v) => s + v.marketValue, 0);
+  for (const v of valued) {
+    v.allocationPct = totalValue > 0 ? (v.marketValue / totalValue) * 100 : 0;
+  }
+
+  const concentrationHHI = valued.reduce((s, v) => s + (v.allocationPct / 100) ** 2, 0) * 10000;
+  const topHoldingPct = valued.length > 0 ? Math.max(...valued.map(v => v.allocationPct)) : 0;
+  const concentrationRisk: PortfolioValuation['concentrationRisk'] =
+    concentrationHHI > 3000 || topHoldingPct > 40 ? 'high' :
+    concentrationHHI > 1500 || topHoldingPct > 25 ? 'moderate' : 'low';
+
+  return { holdings: valued, totalValue, concentrationHHI, topHoldingPct, concentrationRisk };
+}
+
 export function analyzeAlignment(tickers: string[]): TickerAlignment[] {
   return tickers.map(t => {
     const ticker = t.toUpperCase();
@@ -255,17 +310,17 @@ export function analyzeAlignment(tickers: string[]): TickerAlignment[] {
   });
 }
 
-export function computePortfolioSummary(alignments: TickerAlignment[], holdings?: PortfolioHolding[]): PortfolioSummary {
+export function computePortfolioSummary(alignments: TickerAlignment[], valuation?: PortfolioValuation): PortfolioSummary {
   let avgScore: number;
 
-  if (holdings && holdings.length > 0) {
-    let totalWeight = 0;
+  if (valuation && valuation.totalValue > 0) {
     let weightedScore = 0;
-    for (const h of holdings) {
-      const a = alignments.find(al => al.ticker === h.ticker.toUpperCase());
+    let totalWeight = 0;
+    for (const hv of valuation.holdings) {
+      const a = alignments.find(al => al.ticker === hv.ticker);
       if (a) {
-        weightedScore += a.alignmentScore * h.currentAllocation;
-        totalWeight += h.currentAllocation;
+        weightedScore += a.alignmentScore * hv.allocationPct;
+        totalWeight += hv.allocationPct;
       }
     }
     avgScore = totalWeight > 0 ? weightedScore / totalWeight : alignments.reduce((s, a) => s + a.alignmentScore, 0) / alignments.length;
@@ -332,45 +387,43 @@ export function computePortfolioSummary(alignments: TickerAlignment[], holdings?
 }
 
 export function computeRevisedAllocations(
-  holdings: PortfolioHolding[],
+  valuation: PortfolioValuation,
   alignments: TickerAlignment[]
 ): RevisedAllocation[] {
   const results: RevisedAllocation[] = [];
+  const totalValue = valuation.totalValue;
 
-  for (const h of holdings) {
-    const ticker = h.ticker.toUpperCase();
+  for (const hv of valuation.holdings) {
+    const ticker = hv.ticker;
     const alignment = alignments.find(a => a.ticker === ticker);
     const profile = tickerDb[ticker];
+    const price = hv.currentPrice;
 
-    if (!alignment) continue;
+    if (!alignment || price <= 0) continue;
 
-    const name = alignment.name;
-    const current = h.currentAllocation;
-    let suggested = current;
-    let direction: RevisedAllocation['direction'] = 'maintain';
+    let targetPct = hv.allocationPct;
+    let action: RevisedAction = 'hold';
     let reason = '';
     let supportingInsight = '';
 
     if (alignment.alignmentScore >= 8) {
-      const bump = Math.min(current * 0.2, 5);
-      suggested = Math.round((current + bump) * 10) / 10;
-      direction = 'increase';
+      const bump = Math.min(hv.allocationPct * 0.2, 5);
+      targetPct = hv.allocationPct + bump;
+      action = 'buy more';
       reason = 'Strong alignment with report\'s top themes — AI, tech infrastructure, and high-growth sectors.';
       supportingInsight = 'AI enterprise adoption at 78% and accelerating. Tech sector +18.5% YTD leads all sectors.';
     } else if (alignment.alignmentScore >= 6.5) {
-      direction = 'maintain';
-      suggested = current;
+      action = 'hold';
       reason = 'Solid alignment — holding contributes to portfolio balance and theme exposure.';
       supportingInsight = `${alignment.sector} sector shows stable or positive signals in the report.`;
     } else if (alignment.alignmentScore >= 4.5) {
-      direction = 'maintain';
-      suggested = current;
+      action = 'hold';
       reason = 'Moderate alignment — may serve a portfolio role (diversification, income) but not a core growth driver.';
       supportingInsight = 'Report signals are neutral to mildly positive for this sector.';
-    } else {
-      const cut = Math.min(current * 0.3, 5);
-      suggested = Math.max(0, Math.round((current - cut) * 10) / 10);
-      direction = 'decrease';
+    } else if (alignment.alignmentScore >= 2.5) {
+      const cut = Math.min(hv.allocationPct * 0.3, 5);
+      targetPct = Math.max(0, hv.allocationPct - cut);
+      action = 'reduce';
 
       if (profile?.themes.includes('oil-gas')) {
         reason = 'Energy sector faces transition headwinds — report shows -6.5% YTD and declining lobbying spend.';
@@ -385,26 +438,49 @@ export function computeRevisedAllocations(
         reason = 'Low alignment with report\'s growth themes — capital may be better deployed elsewhere.';
         supportingInsight = 'Highest-scoring themes (AI, cybersecurity, climate tech) are underrepresented.';
       }
+    } else {
+      targetPct = 0;
+      action = 'exit';
+      reason = 'Very low alignment with report insights — consider reallocating entirely to higher-conviction holdings.';
+      supportingInsight = 'Highest-scoring themes (AI, cybersecurity, climate tech) are underrepresented.';
     }
 
     results.push({
       ticker,
-      name,
-      currentPct: current,
-      suggestedPct: suggested,
-      direction,
+      name: hv.name,
+      currentShares: hv.shares,
+      currentValue: hv.marketValue,
+      currentPct: Math.round(hv.allocationPct * 10) / 10,
+      targetShares: 0,
+      targetValue: 0,
+      targetPct: 0,
+      action,
       reason,
       supportingInsight,
     });
   }
 
-  // Normalize suggested percentages to sum to ~100%
-  const totalSuggested = results.reduce((s, r) => s + r.suggestedPct, 0);
-  if (totalSuggested > 0 && Math.abs(totalSuggested - 100) > 1) {
-    const factor = 100 / totalSuggested;
-    for (const r of results) {
-      r.suggestedPct = Math.round(r.suggestedPct * factor * 10) / 10;
-    }
+  // Normalize target percentages to sum to 100%
+  const rawTotal = results.reduce((s, r) => {
+    const hv = valuation.holdings.find(h => h.ticker === r.ticker)!;
+    const raw = r.action === 'exit' ? 0 :
+      r.action === 'buy more' ? hv.allocationPct + Math.min(hv.allocationPct * 0.2, 5) :
+      r.action === 'reduce' ? Math.max(0, hv.allocationPct - Math.min(hv.allocationPct * 0.3, 5)) :
+      hv.allocationPct;
+    return s + raw;
+  }, 0);
+  const factor = rawTotal > 0 ? 100 / rawTotal : 1;
+
+  for (const r of results) {
+    const hv = valuation.holdings.find(h => h.ticker === r.ticker)!;
+    const rawPct = r.action === 'exit' ? 0 :
+      r.action === 'buy more' ? hv.allocationPct + Math.min(hv.allocationPct * 0.2, 5) :
+      r.action === 'reduce' ? Math.max(0, hv.allocationPct - Math.min(hv.allocationPct * 0.3, 5)) :
+      hv.allocationPct;
+
+    r.targetPct = Math.round(rawPct * factor * 10) / 10;
+    r.targetValue = Math.round(totalValue * r.targetPct / 100);
+    r.targetShares = hv.currentPrice > 0 ? Math.round(r.targetValue / hv.currentPrice) : 0;
   }
 
   return results;
@@ -438,7 +514,10 @@ export function computeTaxImplications(
     let taxConsiderations = '';
     let accountGuidance = '';
 
-    if (r.direction === 'decrease') {
+    const isSelling = r.action === 'reduce' || r.action === 'exit';
+    const isBuying = r.action === 'buy more';
+
+    if (isSelling) {
       investmentRationale = `From an investment perspective: ${r.reason} ${r.supportingInsight}`;
 
       if (isTaxable && hasGains) {
@@ -476,7 +555,7 @@ export function computeTaxImplications(
           ? 'If you hold this position in both taxable and tax-advantaged accounts, consider reducing in the tax-advantaged account first to avoid triggering gains.'
           : 'Consider which account holds this position before acting.';
 
-    } else if (r.direction === 'increase') {
+    } else if (isBuying) {
       investmentRationale = `From an investment perspective: ${r.reason} ${r.supportingInsight}`;
 
       if (isTaxable) {

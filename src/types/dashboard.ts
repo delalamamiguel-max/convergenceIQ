@@ -151,15 +151,42 @@ export interface TickerAlignment {
 
 export interface PortfolioHolding {
   ticker: string;
-  currentAllocation: number;
+  shares: number;
+  costBasis?: number;
 }
+
+export interface HoldingValuation {
+  ticker: string;
+  name: string;
+  shares: number;
+  costBasis: number | null;
+  currentPrice: number;
+  marketValue: number;
+  allocationPct: number;
+  gainLoss: number | null;
+  gainLossPct: number | null;
+}
+
+export interface PortfolioValuation {
+  holdings: HoldingValuation[];
+  totalValue: number;
+  concentrationHHI: number;
+  topHoldingPct: number;
+  concentrationRisk: 'low' | 'moderate' | 'high';
+}
+
+export type RevisedAction = 'hold' | 'buy more' | 'reduce' | 'exit';
 
 export interface RevisedAllocation {
   ticker: string;
   name: string;
+  currentShares: number;
+  currentValue: number;
   currentPct: number;
-  suggestedPct: number;
-  direction: 'increase' | 'decrease' | 'maintain';
+  targetShares: number;
+  targetValue: number;
+  targetPct: number;
+  action: RevisedAction;
   reason: string;
   supportingInsight: string;
 }
