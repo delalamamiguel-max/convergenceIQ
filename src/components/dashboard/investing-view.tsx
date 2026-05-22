@@ -11,6 +11,7 @@ import { useDashboardStore } from '@/lib/store';
 import { computeCompositeScore } from '@/lib/scoring-engine';
 import { Signal } from '@/types/dashboard';
 import { PortfolioAlignment } from './portfolio-alignment';
+import { WatchlistAlerts } from './watchlist-alerts';
 import { TrendingUp, Shield, Landmark, BarChart3, Globe } from 'lucide-react';
 
 export function InvestingView() {
@@ -97,6 +98,11 @@ export function InvestingView() {
           <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">FRED / Alpha Vantage</Badge>
         </div>
         <TrendLine data={histData} color="#818cf8" label="S&P 500" />
+      </div>
+
+      {/* Watchlist Alerts */}
+      <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
+        <WatchlistAlerts />
       </div>
 
       <div>
