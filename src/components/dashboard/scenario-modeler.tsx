@@ -9,7 +9,7 @@ import { computeScenarioEffects } from '@/lib/scoring-engine';
 import { ScenarioEffect } from '@/types/dashboard';
 import { Beaker, RotateCcw, ArrowRight } from 'lucide-react';
 import { InsightBlock } from './insight-block';
-import { useT } from '@/lib/i18n';
+import { useT, useTd } from '@/lib/i18n';
 
 const categoryBorder: Record<string, string> = {
   ethical: 'border-emerald-400/30',
@@ -26,6 +26,7 @@ const domainColors: Record<string, string> = {
 
 export function ScenarioModeler() {
   const t = useT();
+  const td = useTd();
   const [overrides, setOverrides] = useState<Record<string, number>>({});
   const [effects, setEffects] = useState<ScenarioEffect[]>([]);
 
@@ -64,7 +65,7 @@ export function ScenarioModeler() {
           return (
             <div key={variable.id} className={`p-3 rounded-lg border ${categoryBorder[variable.category]} transition-colors`} style={{ backgroundColor: 'var(--dash-bg-muted)' }}>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-[var(--dash-text-2)]">{variable.label}</span>
+                <span className="text-sm text-[var(--dash-text-2)]">{td(variable.label)}</span>
                 <span className={`text-xs font-mono ${changed ? 'text-purple-500 dark:text-purple-400' : 'text-[var(--dash-text-4)]'}`}>
                   {value}{variable.unit === '%' ? '%' : ` ${variable.unit}`}
                 </span>
@@ -96,8 +97,8 @@ export function ScenarioModeler() {
                   {effect.targetDomain === 'investing' ? 'INV' : effect.targetDomain === 'entrepreneurship' ? 'ENT' : 'JOB'}
                 </Badge>
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs text-[var(--dash-text-2)] truncate">{effect.targetSector}</div>
-                  <div className="text-xs text-[var(--dash-text-4)]">{effect.metric}</div>
+                  <div className="text-xs text-[var(--dash-text-2)] truncate">{td(effect.targetSector)}</div>
+                  <div className="text-xs text-[var(--dash-text-4)]">{td(effect.metric)}</div>
                 </div>
                 <ArrowRight className="w-3 h-3 text-[var(--dash-text-4)] flex-shrink-0" />
                 <div className={`text-sm font-mono font-bold ${effect.changePercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
@@ -128,15 +129,15 @@ export function ScenarioModeler() {
               count: effects.length,
               positive: positiveEffects.length,
               negative: negativeEffects.length,
-              sector: biggestEffect.targetSector,
+              sector: td(biggestEffect.targetSector),
               domain: biggestEffect.targetDomain,
               change: `${biggestEffect.changePercent >= 0 ? '+' : ''}${biggestEffect.changePercent.toFixed(1)}`,
               confidence: (avgConfidence * 100).toFixed(0),
             })}
             why={t('scenario.insightWhy')}
             rec={negativeEffects.length > positiveEffects.length
-              ? t('scenario.insightRecNegative', { domain: biggestEffect.targetDomain, sector: biggestEffect.targetSector })
-              : t('scenario.insightRecPositive', { sector: biggestEffect.targetSector, domain: biggestEffect.targetDomain })}
+              ? t('scenario.insightRecNegative', { domain: biggestEffect.targetDomain, sector: td(biggestEffect.targetSector) })
+              : t('scenario.insightRecPositive', { sector: td(biggestEffect.targetSector), domain: biggestEffect.targetDomain })}
           />
         );
       })()}

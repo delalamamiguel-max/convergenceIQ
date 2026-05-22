@@ -7,7 +7,7 @@ import { BarRanking } from '@/components/charts/bar-ranking';
 import { SignalRadar } from '@/components/charts/signal-radar';
 import { corruptionIndex, disruptionData, culturalTrends, techAdoptionForecasts } from '@/lib/data/curated-datasets';
 import { useDashboardStore } from '@/lib/store';
-import { useT } from '@/lib/i18n';
+import { useT, useTd } from '@/lib/i18n';
 import { computeCompositeScore } from '@/lib/scoring-engine';
 import { Signal } from '@/types/dashboard';
 import { Rocket, Globe2, Cpu, Users, Lightbulb } from 'lucide-react';
@@ -16,6 +16,7 @@ import { InsightBlock } from './insight-block';
 export function EntrepreneurshipView() {
   const { weights, thresholds } = useDashboardStore();
   const t = useT();
+  const td = useTd();
   const [selectedSignal, setSelectedSignal] = useState<Signal | null>(null);
 
   const allSignals = useMemo(() => [...corruptionIndex, ...disruptionData, ...culturalTrends, ...techAdoptionForecasts], []);
@@ -28,14 +29,16 @@ export function EntrepreneurshipView() {
   const topTech = techAdoptionForecasts.reduce((a, b) => a.value > b.value ? a : b);
 
   const disruptionChart = disruptionData.map(d => ({
-    name: d.label.replace(' Funding', '').replace(' Disruption Index', '').replace(' Innovation', '').replace(' Market Growth', '').replace(' Ventures', ''),
+    name: td(d.label).replace(' Funding', '').replace(' Disruption Index', '').replace(' Innovation', '').replace(' Market Growth', '').replace(' Ventures', '')
+      .replace(' de Startups IA/ML', '').replace('Financiamiento en Tecnología Climática', 'Tech Climática').replace('Índice de Disrupción FinTech', 'FinTech').replace('Innovación HealthTech', 'HealthTech').replace('Crecimiento del Mercado EdTech', 'EdTech').replace('Emprendimientos SpaceTech', 'SpaceTech').replace('Financiamiento Web3/Blockchain', 'Web3/Blockchain').replace('Financiamiento de Startups IA/ML', 'IA/ML'),
     value: d.value,
   }));
 
-  const cpiChart = corruptionIndex.map(d => ({ name: d.label.replace(' CPI Score', ''), value: d.value }));
+  const cpiChart = corruptionIndex.map(d => ({ name: td(d.label).replace(' CPI Score', '').replace('Puntuación CPI de ', ''), value: d.value }));
 
   const techChart = techAdoptionForecasts.map(d => ({
-    name: d.label.replace(' Enterprise ', ' ').replace(' Adoption', '').replace(' Maturity', '').replace(' Readiness', '').replace(' Deployment', ''),
+    name: td(d.label).replace(' Enterprise ', ' ').replace(' Adoption', '').replace(' Maturity', '').replace(' Readiness', '').replace(' Deployment', '')
+      .replace('Adopción Empresarial de ', '').replace('Madurez del ', '').replace('Preparación para ', '').replace('Adopción de Seguridad ', '').replace('Despliegue de ', '').replace('Adopción de ', ''),
     value: d.value,
   }));
 
@@ -61,10 +64,10 @@ export function EntrepreneurshipView() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {scores.slice(0, 4).map((score, i) => (
           <div key={i} className="rounded-xl border p-3 md:p-4 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
-            <div className="text-xs text-[var(--dash-text-4)] mb-1 truncate">{score.sector}</div>
+            <div className="text-xs text-[var(--dash-text-4)] mb-1 truncate">{td(score.sector)}</div>
             <div className="flex items-end justify-between">
               <div className="text-2xl md:text-3xl font-bold text-emerald-500 dark:text-emerald-400">{score.score.toFixed(0)}</div>
-              <div className="text-xs text-[var(--dash-text-4)]">{score.region}</div>
+              <div className="text-xs text-[var(--dash-text-4)]">{td(score.region)}</div>
             </div>
             <div className="flex gap-1 mt-2">
               <div className="h-1 flex-1 rounded bg-emerald-500" style={{ opacity: score.breakdown.ethical / 100 }} />
@@ -98,12 +101,12 @@ export function EntrepreneurshipView() {
           <InsightBlock
             accent="emerald"
             what={t('entrepreneurship.disruptionInsightWhat', {
-              topSector: topDisruption.label.replace(' Funding', '').replace(' Disruption Index', '').replace(' Innovation', '').replace(' Market Growth', '').replace(' Ventures', ''),
+              topSector: td(topDisruption.label).replace(' Funding', '').replace(' Disruption Index', '').replace(' Innovation', '').replace(' Market Growth', '').replace(' Ventures', '').replace('Financiamiento de Startups IA/ML', 'IA/ML').replace('Financiamiento en Tecnología Climática', 'Tech Climática').replace('Índice de Disrupción FinTech', 'FinTech').replace('Innovación HealthTech', 'HealthTech').replace('Crecimiento del Mercado EdTech', 'EdTech').replace('Emprendimientos SpaceTech', 'SpaceTech').replace('Financiamiento Web3/Blockchain', 'Web3/Blockchain'),
               topValue: topDisruption.value,
             })}
             why={t('entrepreneurship.disruptionInsightWhy')}
             rec={t('entrepreneurship.disruptionInsightRec', {
-              topSector: topDisruption.label.replace(' Funding', '').replace(' Disruption Index', ''),
+              topSector: td(topDisruption.label).replace(' Funding', '').replace(' Disruption Index', '').replace('Financiamiento de Startups IA/ML', 'IA/ML').replace('Índice de Disrupción FinTech', 'FinTech'),
             })}
           />
         </div>
@@ -142,13 +145,13 @@ export function EntrepreneurshipView() {
           <InsightBlock
             accent="amber"
             what={t('entrepreneurship.cpiInsightWhat', {
-              topCpi: topCpi.label.replace(' CPI Score', ''),
+              topCpi: td(topCpi.label).replace(' CPI Score', '').replace('Puntuación CPI de ', ''),
               topVal: topCpi.value,
-              lowCpi: lowCpi.label.replace(' CPI Score', ''),
+              lowCpi: td(lowCpi.label).replace(' CPI Score', '').replace('Puntuación CPI de ', ''),
               lowVal: lowCpi.value,
             })}
             why={t('entrepreneurship.cpiInsightWhy')}
-            rec={t('entrepreneurship.cpiInsightRec', { lowCpi: lowCpi.label.replace(' CPI Score', '') })}
+            rec={t('entrepreneurship.cpiInsightRec', { lowCpi: td(lowCpi.label).replace(' CPI Score', '').replace('Puntuación CPI de ', '') })}
           />
         </div>
 
@@ -162,12 +165,12 @@ export function EntrepreneurshipView() {
           <InsightBlock
             accent="cyan"
             what={t('entrepreneurship.techInsightWhat', {
-              topTech: topTech.label.replace(' Enterprise ', ' ').replace(' Adoption', '').replace(' Maturity', '').replace(' Readiness', '').replace(' Deployment', ''),
+              topTech: td(topTech.label).replace(' Enterprise ', ' ').replace(' Adoption', '').replace(' Maturity', '').replace(' Readiness', '').replace(' Deployment', '').replace('Adopción Empresarial de ', '').replace('Madurez del ', '').replace('Preparación para ', '').replace('Adopción de Seguridad ', '').replace('Despliegue de ', '').replace('Adopción de ', ''),
               topVal: topTech.value,
             })}
             why={t('entrepreneurship.techInsightWhy')}
             rec={t('entrepreneurship.techInsightRec', {
-              topTech: topTech.label.replace(' Enterprise ', ' ').replace(' Adoption', '').replace(' Maturity', ''),
+              topTech: td(topTech.label).replace(' Enterprise ', ' ').replace(' Adoption', '').replace(' Maturity', '').replace('Adopción Empresarial de ', '').replace('Madurez del ', ''),
             })}
           />
         </div>
@@ -223,12 +226,12 @@ export function EntrepreneurshipView() {
       {selectedSignal && (
         <div className="rounded-xl border border-emerald-500/30 p-5 relative transition-colors" style={{ backgroundColor: 'var(--dash-bg-card-solid)' }}>
           <button onClick={() => setSelectedSignal(null)} className="absolute top-3 right-3 text-[var(--dash-text-4)] hover:text-[var(--dash-text-2)] text-sm">✕</button>
-          <h3 className="text-base font-semibold text-[var(--dash-text-1)] mb-2">{selectedSignal.label}</h3>
+          <h3 className="text-base font-semibold text-[var(--dash-text-1)] mb-2">{td(selectedSignal.label)}</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div><div className="text-[var(--dash-text-4)] text-xs">{t('investing.score')}</div><div className="text-[var(--dash-text-1)] font-bold text-lg">{selectedSignal.value}</div></div>
             <div><div className="text-[var(--dash-text-4)] text-xs">{t('investing.rawValue')}</div><div className="text-[var(--dash-text-1)] font-bold">{selectedSignal.rawValue} {selectedSignal.unit}</div></div>
             <div><div className="text-[var(--dash-text-4)] text-xs">{t('investing.trend')}</div><div className={`font-bold ${selectedSignal.trend === 'up' ? 'text-green-600 dark:text-green-400' : selectedSignal.trend === 'down' ? 'text-red-500' : 'text-[var(--dash-text-4)]'}`}>{selectedSignal.trendMagnitude > 0 ? '+' : ''}{selectedSignal.trendMagnitude}%</div></div>
-            <div><div className="text-[var(--dash-text-4)] text-xs">{t('investing.category')}</div><div className="text-[var(--dash-text-1)] capitalize">{selectedSignal.category}</div></div>
+            <div><div className="text-[var(--dash-text-4)] text-xs">{t('investing.category')}</div><div className="text-[var(--dash-text-1)] capitalize">{td(selectedSignal.category)}</div></div>
           </div>
         </div>
       )}

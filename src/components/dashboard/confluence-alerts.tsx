@@ -2,7 +2,7 @@
 
 import { confluenceAlerts } from '@/lib/data/curated-datasets';
 import { Badge } from '@/components/ui/badge';
-import { useT } from '@/lib/i18n';
+import { useT, useTd } from '@/lib/i18n';
 import { Zap, AlertTriangle, Info } from 'lucide-react';
 import { InsightBlock } from './insight-block';
 
@@ -35,6 +35,7 @@ const domainLabels = {
 
 export function ConfluenceAlerts() {
   const t = useT();
+  const td = useTd();
   const highCount = confluenceAlerts.filter(a => a.severity === 'high').length;
   const mediumCount = confluenceAlerts.filter(a => a.severity === 'medium').length;
   const crossDomainCount = confluenceAlerts.filter(a => a.domains.length > 1).length;
@@ -51,7 +52,7 @@ export function ConfluenceAlerts() {
               <Icon className={`w-5 h-5 md:w-6 md:h-6 mt-0.5 flex-shrink-0 ${config.color}`} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                  <span className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{alert.sector}</span>
+                  <span className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{td(alert.sector)}</span>
                   <Badge variant="outline" className={`text-xs ${config.badge}`}>
                     {t('confluence.signalsBadge', { n: alert.signalCount })}
                   </Badge>
@@ -62,9 +63,9 @@ export function ConfluenceAlerts() {
                   ))}
                 </div>
                 <p className="text-sm text-[var(--dash-text-3)] leading-relaxed">
-                  {alert.description}
+                  {td(alert.description)}
                 </p>
-                <div className="text-xs text-[var(--dash-text-4)] mt-2">{alert.region} · {alert.timestamp}</div>
+                <div className="text-xs text-[var(--dash-text-4)] mt-2">{td(alert.region)} · {alert.timestamp}</div>
               </div>
             </div>
           </div>

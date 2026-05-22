@@ -12,13 +12,14 @@ import {
 } from '@/lib/data/curated-datasets';
 import { computeCompositeScore } from '@/lib/scoring-engine';
 import { useDashboardStore } from '@/lib/store';
-import { useT } from '@/lib/i18n';
+import { useT, useTd } from '@/lib/i18n';
 import { Activity, GitBranch, Zap, TrendingUp, Rocket, Briefcase } from 'lucide-react';
 import { InsightBlock } from './insight-block';
 
 export function Overview() {
   const { weights, thresholds, setActiveDomain } = useDashboardStore();
   const t = useT();
+  const td = useTd();
 
   const investingSignals = useMemo(() => [...conflictData, ...lobbyingData], []);
   const entrepreneurshipSignals = useMemo(() => [...disruptionData, ...culturalTrends, ...techAdoptionForecasts], []);
@@ -119,7 +120,7 @@ export function Overview() {
               <div className="space-y-2">
                 {summary.topSectors.map((sector, i) => (
                   <div key={i} className="flex items-center justify-between">
-                    <span className="text-sm text-[var(--dash-text-3)] truncate mr-2">{sector.sector}</span>
+                    <span className="text-sm text-[var(--dash-text-3)] truncate mr-2">{td(sector.sector)}</span>
                     <div className="flex items-center gap-2">
                       <div className="w-28 h-2 rounded overflow-hidden" style={{ backgroundColor: 'var(--dash-border)' }}>
                         <div className={`h-full rounded ${summary.barColor}`} style={{ width: `${sector.score}%` }} />

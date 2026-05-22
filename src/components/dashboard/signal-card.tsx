@@ -2,7 +2,7 @@
 
 import { Signal } from '@/types/dashboard';
 import { Badge } from '@/components/ui/badge';
-import { useT } from '@/lib/i18n';
+import { useT, useTd } from '@/lib/i18n';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 const categoryLabelKeys: Record<string, string> = {
@@ -42,6 +42,7 @@ function getScoreRing(value: number): string {
 
 export function SignalCard({ signal, onClick }: SignalCardProps) {
   const t = useT();
+  const td = useTd();
   const TrendIcon = signal.trend === 'up' ? TrendingUp : signal.trend === 'down' ? TrendingDown : Minus;
   const trendColor = signal.trend === 'up' ? 'text-green-600 dark:text-green-400' : signal.trend === 'down' ? 'text-red-500 dark:text-red-400' : 'text-[var(--dash-text-4)]';
 
@@ -64,7 +65,7 @@ export function SignalCard({ signal, onClick }: SignalCardProps) {
       </div>
 
       <h4 className="text-sm md:text-base font-medium text-[var(--dash-text-2)] mb-2 group-hover:text-[var(--dash-text-1)] transition-colors line-clamp-2">
-        {signal.label}
+        {td(signal.label)}
       </h4>
 
       <div className="flex items-end justify-between">
@@ -78,8 +79,8 @@ export function SignalCard({ signal, onClick }: SignalCardProps) {
         </div>
         {signal.region && (
           <div className="text-xs text-[var(--dash-text-4)] text-right">
-            {signal.region}
-            {signal.sector && <><br />{signal.sector}</>}
+            {td(signal.region)}
+            {signal.sector && <><br />{td(signal.sector)}</>}
           </div>
         )}
       </div>

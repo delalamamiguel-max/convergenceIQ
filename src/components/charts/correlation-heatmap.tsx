@@ -2,6 +2,7 @@
 
 import { CorrelationEntry } from '@/types/dashboard';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useTd } from '@/lib/i18n';
 
 interface CorrelationHeatmapProps {
   data: CorrelationEntry[];
@@ -22,6 +23,7 @@ function correlationTextColor(value: number): string {
 }
 
 export function CorrelationHeatmap({ data }: CorrelationHeatmapProps) {
+  const td = useTd();
   return (
     <div className="space-y-1.5">
       {data.map((entry, i) => (
@@ -29,9 +31,9 @@ export function CorrelationHeatmap({ data }: CorrelationHeatmapProps) {
           <TooltipTrigger>
             <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[var(--dash-bg-muted)] transition-colors cursor-pointer text-left w-full">
               <div className="flex-1 min-w-0">
-                <div className="text-sm text-[var(--dash-text-3)] truncate">{entry.source}</div>
+                <div className="text-sm text-[var(--dash-text-3)] truncate">{td(entry.source)}</div>
                 <div className="text-xs text-[var(--dash-text-4)]">→</div>
-                <div className="text-sm text-[var(--dash-text-3)] truncate">{entry.target}</div>
+                <div className="text-sm text-[var(--dash-text-3)] truncate">{td(entry.target)}</div>
               </div>
               <div className={`w-16 h-10 md:w-18 md:h-11 rounded flex items-center justify-center font-mono text-sm font-bold ${correlationBg(entry.correlation)} ${correlationTextColor(entry.correlation)}`}>
                 {entry.correlation > 0 ? '+' : ''}{entry.correlation.toFixed(2)}
@@ -42,7 +44,7 @@ export function CorrelationHeatmap({ data }: CorrelationHeatmapProps) {
             </div>
           </TooltipTrigger>
           <TooltipContent className="bg-[var(--dash-bg-card-solid)] border-[var(--dash-border)] text-[var(--dash-text-1)] max-w-xs">
-            <p className="font-semibold">{entry.source} → {entry.target}</p>
+            <p className="font-semibold">{td(entry.source)} → {td(entry.target)}</p>
             <p className="text-sm text-[var(--dash-text-3)] mt-1">
               Correlation: {entry.correlation.toFixed(3)} | Lag: {entry.lag} months | Significance: {(entry.significance * 100).toFixed(0)}%
             </p>

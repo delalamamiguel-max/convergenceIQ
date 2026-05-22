@@ -12,7 +12,7 @@ import {
   type ActiveListing, type JobMarketSignal,
 } from '@/lib/data/curated-datasets';
 import { useDashboardStore } from '@/lib/store';
-import { useT } from '@/lib/i18n';
+import { useT, useTd, useTdId } from '@/lib/i18n';
 import { computeCompositeScore } from '@/lib/scoring-engine';
 import {
   Briefcase, MapPin, Globe, Building2, TreePine, Lightbulb,
@@ -37,6 +37,8 @@ const severityConfig = {
 export function JobMarketsView() {
   const { weights, thresholds } = useDashboardStore();
   const t = useT();
+  const td = useTd();
+  const tdId = useTdId();
   const [activeGeo, setActiveGeo] = useState<PMGeoView>('us');
   const [expandedRole, setExpandedRole] = useState<string | null>(null);
   const [expandedInsight, setExpandedInsight] = useState<string | null>(null);
@@ -74,18 +76,18 @@ export function JobMarketsView() {
   const scores = useMemo(() => computeCompositeScore(allSignals, weights, thresholds), [allSignals, weights, thresholds]);
 
   const salaryChart = roles.map(r => ({
-    name: r.label.replace(/ \(.*\)/, '').replace(' (US)', '').replace(' (Austin)', ''),
+    name: td(r.label).replace(/ \(.*\)/, '').replace(' (US)', '').replace(' (Austin)', '').replace(' (EE.UU.)', ''),
     value: (r.medianSalary || 0) / 1000,
     color: '#22d3ee',
   }));
 
   const growthChart = roles.map(r => ({
-    name: r.label.replace(/ \(.*\)/, '').replace(' (US)', '').replace(' (Austin)', ''),
+    name: td(r.label).replace(/ \(.*\)/, '').replace(' (US)', '').replace(' (Austin)', '').replace(' (EE.UU.)', ''),
     value: r.rawValue,
   }));
 
   const openRolesChart = roles.filter(r => r.openRoles).map(r => ({
-    name: r.label.replace(/ \(.*\)/, '').replace(' (US)', '').replace(' (Austin)', ''),
+    name: td(r.label).replace(/ \(.*\)/, '').replace(' (US)', '').replace(' (Austin)', '').replace(' (EE.UU.)', ''),
     value: r.openRoles!,
     color: '#818cf8',
   }));
@@ -175,7 +177,7 @@ export function JobMarketsView() {
         <StatCard
           icon={<Target className="w-4 h-4 text-purple-500 dark:text-purple-400" />}
           label={t('jobMarkets.stats.highestDemand')}
-          value={roles.sort((a, b) => b.rawValue - a.rawValue)[0]?.label.replace(/ \(.*\)/, '').split(' ').slice(0, 2).join(' ') || '-'}
+          value={td(roles.sort((a, b) => b.rawValue - a.rawValue)[0]?.label ?? '').replace(/ \(.*\)/, '').split(' ').slice(0, 2).join(' ') || '-'}
           sub={t('jobMarkets.stats.growthPct', { value: roles.sort((a, b) => b.rawValue - a.rawValue)[0]?.rawValue || 0 })}
         />
       </div>
@@ -261,26 +263,26 @@ export function JobMarketsView() {
                     <SevIcon className={`w-5 h-5 mt-0.5 flex-shrink-0 ${config.color}`} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{insight.title}</h4>
+                        <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{tdId(insight.id, 'title', insight.title)}</h4>
                         {expanded ? <ChevronUp className="w-4 h-4 text-[var(--dash-text-4)]" /> : <ChevronDown className="w-4 h-4 text-[var(--dash-text-4)]" />}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-[var(--dash-text-4)]">{insight.metric}:</span>
-                        <span className={`text-xs font-bold ${config.color}`}>{insight.metricValue}</span>
+                        <span className="text-xs text-[var(--dash-text-4)]">{tdId(insight.id, 'metric', insight.metric)}:</span>
+                        <span className={`text-xs font-bold ${config.color}`}>{tdId(insight.id, 'metricValue', insight.metricValue)}</span>
                       </div>
                       {expanded && (
                         <div className="mt-3 space-y-3">
                           <div>
                             <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('jobMarkets.insights.whatThisMeans')}</div>
-                            <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{insight.explanation}</p>
+                            <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{tdId(insight.id, 'explanation', insight.explanation)}</p>
                           </div>
                           <div>
                             <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('jobMarkets.insights.whyItMattersForYou')}</div>
-                            <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{insight.whyItMatters}</p>
+                            <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{tdId(insight.id, 'whyItMatters', insight.whyItMatters)}</p>
                           </div>
                           <div className={`rounded-lg p-3 md:p-4 ${config.bg}`}>
                             <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('jobMarkets.insights.recommendedAction')}</div>
-                            <p className={`text-sm font-medium ${config.color}`}>{insight.recommendedAction}</p>
+                            <p className={`text-sm font-medium ${config.color}`}>{tdId(insight.id, 'recommendedAction', insight.recommendedAction)}</p>
                           </div>
                         </div>
                       )}
@@ -367,7 +369,7 @@ export function JobMarketsView() {
                     <div className="px-4 pb-3 border-b" style={{ borderColor: 'var(--dash-border)' }}>
                       <div className="rounded-lg p-3 md:p-4 bg-emerald-50 dark:bg-emerald-500/10 md:ml-8">
                         <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1.5">{t('jobMarkets.listings.whyRelevant')}</div>
-                        <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{listing.relevance}</p>
+                        <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{td(listing.relevance)}</p>
                         <div className="flex flex-wrap items-center gap-3 mt-2.5 pt-2.5 border-t border-emerald-200 dark:border-emerald-500/20">
                           <a
                             href={listing.url}
@@ -384,7 +386,7 @@ export function JobMarketsView() {
                             <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{listing.seniority}</span>
                           </div>
                           <span className="text-xs text-[var(--dash-text-4)]">{t('jobMarkets.listings.foundOn', { source: listing.source })}</span>
-                          <span className="text-xs text-[var(--dash-text-4)]">{listing.postedDate}</span>
+                          <span className="text-xs text-[var(--dash-text-4)]">{td(listing.postedDate)}</span>
                         </div>
                       </div>
                     </div>
@@ -408,7 +410,7 @@ export function JobMarketsView() {
             <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('jobMarkets.marketSignal.title')}</h3>
             <span className="text-xs text-[var(--dash-text-4)]">{t('jobMarkets.marketSignal.subtitle')}</span>
           </div>
-          <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{marketSignal.summary}</p>
+          <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{tdId(marketSignal.id, 'summary', marketSignal.summary)}</p>
         </div>
       )}
 
@@ -441,7 +443,7 @@ export function JobMarketsView() {
                 <div className="p-4 md:p-5 flex items-center gap-4">
                   <div className="text-2xl md:text-3xl font-bold text-cyan-500 dark:text-cyan-400 w-12 md:w-14 text-center">{role.value}</div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)] truncate">{role.label}</h4>
+                    <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)] truncate">{td(role.label)}</h4>
                     <div className="flex flex-wrap items-center gap-3 mt-1">
                       {role.medianSalary && <span className="text-sm text-[var(--dash-text-3)]">${role.medianSalary.toLocaleString()}</span>}
                       {role.openRoles && <span className="text-sm text-[var(--dash-text-4)]">{t('jobMarkets.roles.openings', { n: role.openRoles.toLocaleString() })}</span>}
@@ -465,15 +467,15 @@ export function JobMarketsView() {
                     <div className="mt-4 space-y-3">
                       <div>
                         <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('jobMarkets.roles.whatThisMeans')}</div>
-                        <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{role.explanation}</p>
+                        <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{tdId(role.id, 'explanation', role.explanation)}</p>
                       </div>
                       <div>
                         <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('jobMarkets.roles.whyItMattersForYou')}</div>
-                        <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{role.whyItMatters}</p>
+                        <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{tdId(role.id, 'whyItMatters', role.whyItMatters)}</p>
                       </div>
                       <div className="rounded-lg p-3 md:p-4 bg-cyan-50 dark:bg-cyan-500/10">
                         <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('jobMarkets.roles.recommendedAction')}</div>
-                        <p className="text-sm font-medium text-cyan-700 dark:text-cyan-300">{role.recommendedAction}</p>
+                        <p className="text-sm font-medium text-cyan-700 dark:text-cyan-300">{tdId(role.id, 'recommendedAction', role.recommendedAction)}</p>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
                         <MiniStat label={t('jobMarkets.roles.growthRate')} value={`${role.rawValue}%`} sub={t('jobMarkets.roles.tenYrProjected')} />
@@ -513,10 +515,10 @@ export function JobMarketsView() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{rec.title}</h4>
+                        <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{tdId(rec.id, 'title', rec.title)}</h4>
                         <Badge variant="outline" className={`text-xs ${cat.color}`}>{t(cat.labelKey)}</Badge>
                       </div>
-                      <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{rec.body}</p>
+                      <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{tdId(rec.id, 'body', rec.body)}</p>
                     </div>
                   </div>
                 </div>

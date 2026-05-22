@@ -1,7 +1,7 @@
 'use client';
 
 import { useDashboardStore } from '@/lib/store';
-import { useT } from '@/lib/i18n';
+import { useT, useTd } from '@/lib/i18n';
 import { thresholdPresets } from '@/lib/data/curated-datasets';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ export function ControlPanel() {
     setActivePreset, setWeights, setThresholds,
   } = useDashboardStore();
   const t = useT();
+  const td = useTd();
 
   const categories = [
     { key: 'ethical' as const, labelKey: 'control.categories.ethical.label', color: 'bg-emerald-500' },
@@ -43,10 +44,10 @@ export function ControlPanel() {
                   ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 border-indigo-500/30'
                   : 'text-[var(--dash-text-3)] border-[var(--dash-border)] hover:border-[var(--dash-text-4)] hover:text-[var(--dash-text-2)]'
               }`}
-              title={preset.description}
+              title={td(preset.description)}
             >
               <span className="mr-1">{preset.icon}</span>
-              {preset.name}
+              {td(preset.name)}
             </button>
           ))}
         </div>
