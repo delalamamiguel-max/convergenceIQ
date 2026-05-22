@@ -1,6 +1,7 @@
 'use client';
 
 import { useDashboardStore } from '@/lib/store';
+import { useT } from '@/lib/i18n';
 import { thresholdPresets } from '@/lib/data/curated-datasets';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
@@ -13,24 +14,25 @@ export function ControlPanel() {
     activePreset, weights, thresholds,
     setActivePreset, setWeights, setThresholds,
   } = useDashboardStore();
+  const t = useT();
 
   const categories = [
-    { key: 'ethical' as const, label: 'Ethical', color: 'bg-emerald-500', description: 'Conflict, corruption, ESG' },
-    { key: 'cultural' as const, label: 'Cultural', color: 'bg-purple-500', description: 'Trends, sentiment, social' },
-    { key: 'regulatory' as const, label: 'Regulatory', color: 'bg-amber-500', description: 'SEC, lobbying, compliance' },
-    { key: 'technological' as const, label: 'Tech', color: 'bg-blue-500', description: 'AI, disruption, adoption' },
+    { key: 'ethical' as const, labelKey: 'control.categories.ethical.label', color: 'bg-emerald-500' },
+    { key: 'cultural' as const, labelKey: 'control.categories.cultural.label', color: 'bg-purple-500' },
+    { key: 'regulatory' as const, labelKey: 'control.categories.regulatory.label', color: 'bg-amber-500' },
+    { key: 'technological' as const, labelKey: 'control.categories.technological.label', color: 'bg-blue-500' },
   ];
 
   return (
     <div className="rounded-xl border p-4 md:p-5 space-y-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
       <div className="flex items-center gap-2 text-sm md:text-base font-semibold text-[var(--dash-text-1)]">
         <Settings2 className="w-4.5 h-4.5 text-[var(--dash-text-3)]" />
-        Control Panel
+        {t('control.title')}
       </div>
 
       {/* Presets */}
       <div>
-        <div className="text-xs text-[var(--dash-text-4)] mb-2.5 font-medium uppercase tracking-wide">Quick Presets</div>
+        <div className="text-xs text-[var(--dash-text-4)] mb-2.5 font-medium uppercase tracking-wide">{t('control.quickPresets')}</div>
         <div className="flex flex-wrap gap-2">
           {thresholdPresets.map(preset => (
             <button
@@ -54,14 +56,14 @@ export function ControlPanel() {
 
       {/* Weights */}
       <div>
-        <div className="text-xs text-[var(--dash-text-4)] mb-3 font-medium uppercase tracking-wide">Signal Weights</div>
+        <div className="text-xs text-[var(--dash-text-4)] mb-3 font-medium uppercase tracking-wide">{t('control.signalWeights')}</div>
         <div className="space-y-4">
           {categories.map(cat => (
             <div key={cat.key}>
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <div className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
-                  <span className="text-sm text-[var(--dash-text-2)]">{cat.label}</span>
+                  <span className="text-sm text-[var(--dash-text-2)]">{t(cat.labelKey)}</span>
                 </div>
                 <span className="text-sm font-mono text-[var(--dash-text-4)]">
                   {(weights[cat.key] * 100).toFixed(0)}%
@@ -83,14 +85,14 @@ export function ControlPanel() {
 
       {/* Thresholds */}
       <div>
-        <div className="text-xs text-[var(--dash-text-4)] mb-3 font-medium uppercase tracking-wide">Minimum Thresholds</div>
+        <div className="text-xs text-[var(--dash-text-4)] mb-3 font-medium uppercase tracking-wide">{t('control.minThresholds')}</div>
         <div className="space-y-4">
           {categories.map(cat => (
             <div key={cat.key}>
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <div className={`w-2.5 h-2.5 rounded-full ${cat.color}`} />
-                  <span className="text-sm text-[var(--dash-text-2)]">{cat.label}</span>
+                  <span className="text-sm text-[var(--dash-text-2)]">{t(cat.labelKey)}</span>
                 </div>
                 <Badge variant="outline" className="text-xs px-2 py-0.5 border-[var(--dash-border)] text-[var(--dash-text-4)]">
                   &ge;{thresholds[cat.key]}
@@ -117,7 +119,7 @@ export function ControlPanel() {
         onClick={() => setActivePreset('balanced')}
       >
         <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
-        Reset to Defaults
+        {t('control.resetDefaults')}
       </Button>
     </div>
   );

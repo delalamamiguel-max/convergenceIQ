@@ -2,6 +2,7 @@
 
 import { useDashboardStore } from '@/lib/store';
 import { useTheme } from '@/components/theme-provider';
+import { useLanguageStore, useT } from '@/lib/i18n';
 import { ControlPanel } from './control-panel';
 import { Overview } from './overview';
 import { InvestingView } from './investing-view';
@@ -10,16 +11,18 @@ import { JobMarketsView } from './job-markets-view';
 import { Badge } from '@/components/ui/badge';
 import { Activity, TrendingUp, Rocket, Briefcase, ChevronLeft, Sun, Moon } from 'lucide-react';
 
-const navItems = [
-  { id: 'overview' as const, label: 'Overview', icon: Activity, color: 'text-gray-500 dark:text-gray-300' },
-  { id: 'investing' as const, label: 'Investing', icon: TrendingUp, color: 'text-indigo-500 dark:text-indigo-400' },
-  { id: 'entrepreneurship' as const, label: 'Entrepreneurship', icon: Rocket, color: 'text-emerald-500 dark:text-emerald-400' },
-  { id: 'jobMarkets' as const, label: 'Job Markets', icon: Briefcase, color: 'text-cyan-500 dark:text-cyan-400' },
+const navItemDefs = [
+  { id: 'overview' as const, key: 'nav.overview', icon: Activity, color: 'text-gray-500 dark:text-gray-300' },
+  { id: 'investing' as const, key: 'nav.investing', icon: TrendingUp, color: 'text-indigo-500 dark:text-indigo-400' },
+  { id: 'entrepreneurship' as const, key: 'nav.entrepreneurship', icon: Rocket, color: 'text-emerald-500 dark:text-emerald-400' },
+  { id: 'jobMarkets' as const, key: 'nav.jobMarkets', icon: Briefcase, color: 'text-cyan-500 dark:text-cyan-400' },
 ];
 
 export function MainDashboard() {
   const { activeDomain, setActiveDomain } = useDashboardStore();
   const { theme, toggleTheme } = useTheme();
+  const { lang, setLang } = useLanguageStore();
+  const t = useT();
 
   const renderView = () => {
     switch (activeDomain) {
@@ -49,7 +52,7 @@ export function MainDashboard() {
               </div>
 
               <div className="hidden md:flex items-center gap-1.5 ml-6">
-                {navItems.map(item => {
+                {navItemDefs.map(item => {
                   const Icon = item.icon;
                   const active = activeDomain === item.id;
                   return (
@@ -63,7 +66,7 @@ export function MainDashboard() {
                       }`}
                     >
                       <Icon className={`w-4 h-4 ${active ? item.color : ''}`} />
-                      {item.label}
+                      {t(item.key)}
                     </button>
                   );
                 })}
@@ -72,16 +75,25 @@ export function MainDashboard() {
 
             <div className="flex items-center gap-3">
               <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)] hidden sm:flex">
-                Live Data + Curated Sources
+                {t('app.liveDataBadge')}
               </Badge>
               <div className="text-xs text-[var(--dash-text-4)] hidden sm:block">
-                {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {new Date().toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </div>
+
+              {/* Language Toggle */}
+              <button
+                onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
+                aria-label={lang === 'en' ? 'Switch to Spanish' : 'Switch to English'}
+                className="h-9 md:h-10 px-3 rounded-lg flex items-center justify-center transition-all border border-[var(--dash-border)] bg-[var(--dash-bg-card)] text-[var(--dash-text-3)] hover:text-[var(--dash-text-1)] hover:border-indigo-500/50 focus-visible:outline-2 focus-visible:outline-indigo-500 text-xs font-semibold"
+              >
+                {t('nav.langToggle')}
+              </button>
 
               {/* Theme Toggle */}
               <button
                 onClick={toggleTheme}
-                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                aria-label={theme === 'dark' ? t('theme.switchToLight') : t('theme.switchToDark')}
                 className="w-9 h-9 md:w-10 md:h-10 rounded-lg flex items-center justify-center transition-all border border-[var(--dash-border)] bg-[var(--dash-bg-card)] text-[var(--dash-text-3)] hover:text-[var(--dash-text-1)] hover:border-indigo-500/50 focus-visible:outline-2 focus-visible:outline-indigo-500"
               >
                 {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -92,7 +104,7 @@ export function MainDashboard() {
 
         {/* Mobile nav */}
         <div className="md:hidden flex items-center gap-1.5 px-4 sm:px-6 pb-3 overflow-x-auto">
-          {navItems.map(item => {
+          {navItemDefs.map(item => {
             const Icon = item.icon;
             const active = activeDomain === item.id;
             return (
@@ -106,7 +118,7 @@ export function MainDashboard() {
                 }`}
               >
                 <Icon className={`w-4 h-4 ${active ? item.color : ''}`} />
-                {item.label}
+                {t(item.key)}
               </button>
             );
           })}
@@ -121,7 +133,7 @@ export function MainDashboard() {
             className="flex items-center gap-1.5 text-sm text-[var(--dash-text-4)] hover:text-[var(--dash-text-2)] mb-5 transition-colors focus-visible:outline-2 focus-visible:outline-indigo-500 rounded"
           >
             <ChevronLeft className="w-4 h-4" />
-            Back to Overview
+            {t('nav.backToOverview')}
           </button>
         )}
 
@@ -138,9 +150,9 @@ export function MainDashboard() {
 
               {/* Data Sources Legend */}
               <div className="mt-4 p-4 rounded-xl border transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
-                <div className="text-xs text-[var(--dash-text-4)] font-medium mb-2.5 uppercase tracking-wide">Data Sources</div>
+                <div className="text-xs text-[var(--dash-text-4)] font-medium mb-2.5 uppercase tracking-wide">{t('dataSources.title')}</div>
                 <div className="space-y-1.5">
-                  {[
+                  {([
                     { name: 'FRED (Federal Reserve)', type: 'live' },
                     { name: 'BLS (Bureau of Labor Statistics)', type: 'live' },
                     { name: 'SEC EDGAR', type: 'live' },
@@ -152,7 +164,7 @@ export function MainDashboard() {
                     { name: 'Pew Research (Cultural)', type: 'curated' },
                     { name: 'Crunchbase (Startups)', type: 'curated' },
                     { name: 'MIT (AI Disruption)', type: 'curated' },
-                  ].map(source => (
+                  ] as { name: string; type: string }[]).map(source => (
                     <div key={source.name} className="flex items-center gap-2">
                       <div className={`w-2 h-2 rounded-full flex-shrink-0 ${source.type === 'live' ? 'bg-green-500' : 'bg-amber-500'}`} />
                       <span className="text-xs text-[var(--dash-text-4)]">{source.name}</span>
@@ -162,11 +174,11 @@ export function MainDashboard() {
                 <div className="flex items-center gap-4 mt-3 pt-2.5 border-t border-[var(--dash-border)]">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-green-500" />
-                    <span className="text-xs text-[var(--dash-text-4)]">Live API</span>
+                    <span className="text-xs text-[var(--dash-text-4)]">{t('dataSources.liveApi')}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-amber-500" />
-                    <span className="text-xs text-[var(--dash-text-4)]">Curated Data</span>
+                    <span className="text-xs text-[var(--dash-text-4)]">{t('dataSources.curatedData')}</span>
                   </div>
                 </div>
               </div>

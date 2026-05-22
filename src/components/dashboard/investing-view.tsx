@@ -8,18 +8,28 @@ import { SignalRadar } from '@/components/charts/signal-radar';
 import { TrendLine } from '@/components/charts/trend-line';
 import { conflictData, lobbyingData, sectorGrowthData } from '@/lib/data/curated-datasets';
 import { useDashboardStore } from '@/lib/store';
+import { useT } from '@/lib/i18n';
 import { computeCompositeScore } from '@/lib/scoring-engine';
 import { Signal } from '@/types/dashboard';
 import { PortfolioAlignment } from './portfolio-alignment';
 import { WatchlistAlerts } from './watchlist-alerts';
 import { TrendingUp, Shield, Landmark, BarChart3, Globe } from 'lucide-react';
+import { InsightBlock } from './insight-block';
 
 export function InvestingView() {
   const { weights, thresholds } = useDashboardStore();
+  const t = useT();
   const [selectedSignal, setSelectedSignal] = useState<Signal | null>(null);
 
   const allSignals = useMemo(() => [...conflictData, ...lobbyingData], []);
   const scores = useMemo(() => computeCompositeScore(allSignals, weights, thresholds), [allSignals, weights, thresholds]);
+
+  const avgScore = scores.length > 0 ? scores.reduce((s, c) => s + c.score, 0) / scores.length : 0;
+  const topSector = scores.length > 0 ? scores.reduce((a, b) => a.score > b.score ? a : b) : null;
+  const positiveCount = sectorGrowthData.sectors.filter(s => s.ytd >= 0).length;
+  const negativeCount = sectorGrowthData.sectors.filter(s => s.ytd < 0).length;
+  const bestSector = sectorGrowthData.sectors.reduce((a, b) => a.ytd > b.ytd ? a : b);
+  const worstSector = sectorGrowthData.sectors.reduce((a, b) => a.ytd < b.ytd ? a : b);
 
   const sectorChartData = sectorGrowthData.sectors.map(s => ({
     name: s.name.replace('Information ', 'Info ').replace('Consumer ', 'Cons. ').replace('Communication ', 'Comm. '),
@@ -28,10 +38,10 @@ export function InvestingView() {
   }));
 
   const radarData = [
-    { category: 'Ethical', value: scores[0]?.breakdown.ethical || 50, fullMark: 100 },
-    { category: 'Cultural', value: scores[0]?.breakdown.cultural || 50, fullMark: 100 },
-    { category: 'Regulatory', value: scores[0]?.breakdown.regulatory || 50, fullMark: 100 },
-    { category: 'Technological', value: scores[0]?.breakdown.technological || 50, fullMark: 100 },
+    { category: t('control.categories.ethical.label'), categoryKey: 'ethical', value: scores[0]?.breakdown.ethical || 50, fullMark: 100 },
+    { category: t('control.categories.cultural.label'), categoryKey: 'cultural', value: scores[0]?.breakdown.cultural || 50, fullMark: 100 },
+    { category: t('control.categories.regulatory.label'), categoryKey: 'regulatory', value: scores[0]?.breakdown.regulatory || 50, fullMark: 100 },
+    { category: t('control.categories.technological.label'), categoryKey: 'technological', value: scores[0]?.breakdown.technological || 50, fullMark: 100 },
   ];
 
   const histData = Array.from({ length: 24 }, (_, i) => {
@@ -50,8 +60,8 @@ export function InvestingView() {
           <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-indigo-500 dark:text-indigo-400" />
         </div>
         <div>
-          <h2 className="text-lg md:text-xl font-bold text-[var(--dash-text-1)]">Investing Intelligence</h2>
-          <p className="text-sm text-[var(--dash-text-4)]">Conflict data · Lobbying analysis · Sector growth · Regulatory shifts · Sentiment</p>
+          <h2 className="text-lg md:text-xl font-bold text-[var(--dash-text-1)]">{t('investing.title')}</h2>
+          <p className="text-sm text-[var(--dash-text-4)]">{t('investing.subtitle')}</p>
         </div>
       </div>
 
@@ -73,31 +83,84 @@ export function InvestingView() {
         ))}
       </div>
 
+      <InsightBlock
+        what={t('investing.scoreInsightWhat', {
+          avgScore: avgScore.toFixed(0),
+          count: scores.length,
+          topSectorPart: topSector ? t('investing.scoreInsightTopSectorPart', { topSector: topSector.sector, topScore: topSector.score.toFixed(0) }) : '',
+        })}
+        why={t('investing.scoreInsightWhy')}
+        rec={avgScore >= 65
+          ? t('investing.scoreInsightRecHigh', { topSector: topSector?.sector ?? '' })
+          : avgScore >= 45
+          ? t('investing.scoreInsightRecMixed')
+          : t('investing.scoreInsightRecLow')}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
-            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Sector Performance (YTD %)</h3>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('investing.sectorPerf')}</h3>
           </div>
           <BarRanking data={sectorChartData} height={320} colorScale={false} />
+          <InsightBlock
+            what={t('investing.sectorInsightWhat', {
+              positiveCount,
+              totalCount: sectorGrowthData.sectors.length,
+              bestSector: bestSector.name,
+              bestYtd: bestSector.ytd.toFixed(1),
+              worstSector: worstSector.name,
+              worstYtd: worstSector.ytd.toFixed(1),
+            })}
+            why={t('investing.sectorInsightWhy')}
+            rec={positiveCount >= sectorGrowthData.sectors.length * 0.7
+              ? t('investing.sectorInsightRecBroad', { worstSector: worstSector.name })
+              : t('investing.sectorInsightRecRotation', { worstSector: worstSector.name, bestSector: bestSector.name })}
+          />
         </div>
 
         <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-4">
             <Globe className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
-            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Multi-Factor Signal Overview</h3>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('investing.multiFactor')}</h3>
           </div>
           <SignalRadar data={radarData} color="#818cf8" />
+          <InsightBlock
+            accent="purple"
+            what={t('investing.radarInsightWhat', {
+              ethical: radarData[0].value,
+              cultural: radarData[1].value,
+              regulatory: radarData[2].value,
+              technological: radarData[3].value,
+              strongest: radarData.reduce((a, b) => a.value > b.value ? a : b).category,
+            })}
+            why={t('investing.radarInsightWhy')}
+            rec={Math.max(...radarData.map(r => r.value)) - Math.min(...radarData.map(r => r.value)) > 25
+              ? t('investing.radarInsightRecImbalanced', { weakest: radarData.reduce((a, b) => a.value < b.value ? a : b).category.toLowerCase() })
+              : t('investing.radarInsightRecBalanced')}
+          />
         </div>
       </div>
 
       <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
-          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Market Trend (S&P 500 proxy)</h3>
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('investing.marketTrend')}</h3>
           <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">FRED / Alpha Vantage</Badge>
         </div>
         <TrendLine data={histData} color="#818cf8" label="S&P 500" />
+        <InsightBlock
+          what={t('investing.trendInsightWhat', {
+            latest: Math.round(histData[histData.length - 1].value),
+            start: Math.round(histData[0].value),
+            change: ((histData[histData.length - 1].value / histData[0].value - 1) * 100).toFixed(1),
+          })}
+          why={t('investing.trendInsightWhy')}
+          rec={histData[histData.length - 1].value > histData[histData.length - 4].value
+            ? t('investing.trendInsightRecUp')
+            : t('investing.trendInsightRecDown')}
+        />
       </div>
 
       {/* Watchlist Alerts */}
@@ -108,23 +171,51 @@ export function InvestingView() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Shield className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Conflict & Geopolitical Signals</h3>
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('investing.conflictSignals')}</h3>
           <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">ACLED</Badge>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {conflictData.map(signal => <SignalCard key={signal.id} signal={signal} onClick={setSelectedSignal} />)}
         </div>
+        {(() => {
+          const avgConflict = conflictData.reduce((s, c) => s + c.value, 0) / conflictData.length;
+          const rising = conflictData.filter(c => c.trend === 'up').length;
+          return (
+            <InsightBlock
+              accent="emerald"
+              what={t('investing.conflictInsightWhat', { avgScore: avgConflict.toFixed(0), count: conflictData.length, rising })}
+              why={t('investing.conflictInsightWhy')}
+              rec={rising > conflictData.length / 2
+                ? t('investing.conflictInsightRecEscalating')
+                : t('investing.conflictInsightRecContained')}
+            />
+          );
+        })()}
       </div>
 
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Landmark className="w-5 h-5 text-amber-500 dark:text-amber-400" />
-          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Lobbying & Regulatory Influence</h3>
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('investing.lobbyingRegulatory')}</h3>
           <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">OpenSecrets</Badge>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {lobbyingData.map(signal => <SignalCard key={signal.id} signal={signal} onClick={setSelectedSignal} />)}
         </div>
+        {(() => {
+          const avgLobby = lobbyingData.reduce((s, c) => s + c.value, 0) / lobbyingData.length;
+          const topLobby = lobbyingData.reduce((a, b) => a.value > b.value ? a : b);
+          return (
+            <InsightBlock
+              accent="amber"
+              what={t('investing.lobbyInsightWhat', { avgScore: avgLobby.toFixed(0), topLabel: topLobby.label, topValue: topLobby.value })}
+              why={t('investing.lobbyInsightWhy')}
+              rec={avgLobby >= 60
+                ? t('investing.lobbyInsightRecHeavy', { topSector: topLobby.label.split(' ')[0] })
+                : t('investing.lobbyInsightRecModerate')}
+            />
+          );
+        })()}
       </div>
 
       {/* Portfolio Alignment */}
@@ -137,12 +228,12 @@ export function InvestingView() {
           <button onClick={() => setSelectedSignal(null)} className="absolute top-3 right-3 text-[var(--dash-text-4)] hover:text-[var(--dash-text-2)] text-sm">✕</button>
           <h3 className="text-base font-semibold text-[var(--dash-text-1)] mb-2">{selectedSignal.label}</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div><div className="text-[var(--dash-text-4)] text-xs">Score</div><div className="text-[var(--dash-text-1)] font-bold text-lg">{selectedSignal.value}</div></div>
-            <div><div className="text-[var(--dash-text-4)] text-xs">Raw Value</div><div className="text-[var(--dash-text-1)] font-bold">{selectedSignal.rawValue} {selectedSignal.unit}</div></div>
-            <div><div className="text-[var(--dash-text-4)] text-xs">Trend</div><div className={`font-bold ${selectedSignal.trend === 'up' ? 'text-green-600 dark:text-green-400' : selectedSignal.trend === 'down' ? 'text-red-500' : 'text-[var(--dash-text-4)]'}`}>{selectedSignal.trendMagnitude > 0 ? '+' : ''}{selectedSignal.trendMagnitude}%</div></div>
-            <div><div className="text-[var(--dash-text-4)] text-xs">Category</div><div className="text-[var(--dash-text-1)] capitalize">{selectedSignal.category}</div></div>
+            <div><div className="text-[var(--dash-text-4)] text-xs">{t('investing.score')}</div><div className="text-[var(--dash-text-1)] font-bold text-lg">{selectedSignal.value}</div></div>
+            <div><div className="text-[var(--dash-text-4)] text-xs">{t('investing.rawValue')}</div><div className="text-[var(--dash-text-1)] font-bold">{selectedSignal.rawValue} {selectedSignal.unit}</div></div>
+            <div><div className="text-[var(--dash-text-4)] text-xs">{t('investing.trend')}</div><div className={`font-bold ${selectedSignal.trend === 'up' ? 'text-green-600 dark:text-green-400' : selectedSignal.trend === 'down' ? 'text-red-500' : 'text-[var(--dash-text-4)]'}`}>{selectedSignal.trendMagnitude > 0 ? '+' : ''}{selectedSignal.trendMagnitude}%</div></div>
+            <div><div className="text-[var(--dash-text-4)] text-xs">{t('investing.category')}</div><div className="text-[var(--dash-text-1)] capitalize">{selectedSignal.category}</div></div>
           </div>
-          {selectedSignal.region && <div className="mt-3 text-xs text-[var(--dash-text-4)]">Region: {selectedSignal.region} · Sector: {selectedSignal.sector || 'General'} · Source: {selectedSignal.sourceId}</div>}
+          {selectedSignal.region && <div className="mt-3 text-xs text-[var(--dash-text-4)]">{t('investing.region')}: {selectedSignal.region} · {t('investing.sector')}: {selectedSignal.sector || 'General'} · {t('investing.source')}: {selectedSignal.sourceId}</div>}
         </div>
       )}
     </div>

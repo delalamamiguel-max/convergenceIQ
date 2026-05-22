@@ -12,10 +12,13 @@ import {
 } from '@/lib/data/curated-datasets';
 import { computeCompositeScore } from '@/lib/scoring-engine';
 import { useDashboardStore } from '@/lib/store';
+import { useT } from '@/lib/i18n';
 import { Activity, GitBranch, Zap, TrendingUp, Rocket, Briefcase } from 'lucide-react';
+import { InsightBlock } from './insight-block';
 
 export function Overview() {
   const { weights, thresholds, setActiveDomain } = useDashboardStore();
+  const t = useT();
 
   const investingSignals = useMemo(() => [...conflictData, ...lobbyingData], []);
   const entrepreneurshipSignals = useMemo(() => [...disruptionData, ...culturalTrends, ...techAdoptionForecasts], []);
@@ -25,9 +28,24 @@ export function Overview() {
   const entrepreneurshipScores = useMemo(() => computeCompositeScore(entrepreneurshipSignals, weights, thresholds), [entrepreneurshipSignals, weights, thresholds]);
   const jobScores = useMemo(() => computeCompositeScore(jobSignals, weights, thresholds), [jobSignals, weights, thresholds]);
 
+  const avgScore = useMemo(() => {
+    const all = [...investingScores, ...entrepreneurshipScores, ...jobScores];
+    return all.length > 0 ? all.reduce((s, c) => s + c.score, 0) / all.length : 0;
+  }, [investingScores, entrepreneurshipScores, jobScores]);
+
+  const strongestDomain = useMemo(() => {
+    const inv = investingScores.length > 0 ? investingScores.reduce((s, c) => s + c.score, 0) / investingScores.length : 0;
+    const ent = entrepreneurshipScores.length > 0 ? entrepreneurshipScores.reduce((s, c) => s + c.score, 0) / entrepreneurshipScores.length : 0;
+    const job = jobScores.length > 0 ? jobScores.reduce((s, c) => s + c.score, 0) / jobScores.length : 0;
+    const max = Math.max(inv, ent, job);
+    if (max === inv) return { nameKey: 'nav.investing', score: inv };
+    if (max === ent) return { nameKey: 'nav.entrepreneurship', score: ent };
+    return { nameKey: 'nav.jobMarkets', score: job };
+  }, [investingScores, entrepreneurshipScores, jobScores]);
+
   const domainSummaries = [
     {
-      name: 'Investing',
+      nameKey: 'nav.investing',
       domain: 'investing' as const,
       icon: TrendingUp,
       color: 'text-indigo-500 dark:text-indigo-400',
@@ -38,7 +56,7 @@ export function Overview() {
       signalCount: investingSignals.length,
     },
     {
-      name: 'Entrepreneurship',
+      nameKey: 'nav.entrepreneurship',
       domain: 'entrepreneurship' as const,
       icon: Rocket,
       color: 'text-emerald-500 dark:text-emerald-400',
@@ -49,7 +67,7 @@ export function Overview() {
       signalCount: entrepreneurshipSignals.length,
     },
     {
-      name: 'Job Markets',
+      nameKey: 'nav.jobMarkets',
       domain: 'jobMarkets' as const,
       icon: Briefcase,
       color: 'text-cyan-500 dark:text-cyan-400',
@@ -69,8 +87,8 @@ export function Overview() {
           <Activity className="w-5 h-5 md:w-6 md:h-6 text-[var(--dash-text-3)]" />
         </div>
         <div>
-          <h2 className="text-lg md:text-xl font-bold text-[var(--dash-text-1)]">Cross-Domain Intelligence Overview</h2>
-          <p className="text-sm text-[var(--dash-text-4)]">Signal confluence · Correlation analysis · Scenario modeling</p>
+          <h2 className="text-lg md:text-xl font-bold text-[var(--dash-text-1)]">{t('overview.title')}</h2>
+          <p className="text-sm text-[var(--dash-text-4)]">{t('overview.subtitle')}</p>
         </div>
       </div>
 
@@ -90,8 +108,8 @@ export function Overview() {
                   <Icon className={`w-5 h-5 ${summary.color}`} />
                 </div>
                 <div>
-                  <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)] group-hover:text-[var(--dash-text-1)]">{summary.name}</h3>
-                  <div className="text-xs text-[var(--dash-text-4)]">{summary.signalCount} active signals</div>
+                  <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)] group-hover:text-[var(--dash-text-1)]">{t(summary.nameKey)}</h3>
+                  <div className="text-xs text-[var(--dash-text-4)]">{summary.signalCount} {t('overview.activeSignals')}</div>
                 </div>
                 <div className={`ml-auto text-2xl md:text-3xl font-bold ${summary.color}`}>
                   {summary.score.toFixed(0)}
@@ -113,19 +131,34 @@ export function Overview() {
               </div>
 
               <div className="mt-3 text-xs text-[var(--dash-text-4)] group-hover:text-[var(--dash-text-3)]">
-                Click to explore →
+                {t('overview.clickToExplore')}
               </div>
             </div>
           );
         })}
       </div>
 
+      <InsightBlock
+        what={t('overview.insightWhat', {
+          avgScore: avgScore.toFixed(0),
+          totalSignals: investingSignals.length + entrepreneurshipSignals.length + jobSignals.length,
+          strongestName: t(strongestDomain.nameKey),
+          strongestScore: strongestDomain.score.toFixed(0),
+        })}
+        why={t('overview.insightWhy')}
+        rec={avgScore >= 65
+          ? t('overview.insightRecStrong', { strongestName: t(strongestDomain.nameKey) })
+          : avgScore >= 45
+          ? t('overview.insightRecMixed', { strongestName: t(strongestDomain.nameKey) })
+          : t('overview.insightRecWeak')}
+      />
+
       {/* Confluence Alerts */}
       <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
         <div className="flex items-center gap-2 mb-4">
           <Zap className="w-5 h-5 text-amber-500 dark:text-amber-400" />
-          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Signal Confluence Alerts</h3>
-          <Badge variant="outline" className="text-xs border-amber-500/20 text-amber-600 dark:text-amber-400">Cross-Domain</Badge>
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('overview.confluenceAlerts')}</h3>
+          <Badge variant="outline" className="text-xs border-amber-500/20 text-amber-600 dark:text-amber-400">{t('overview.crossDomain')}</Badge>
         </div>
         <ConfluenceAlerts />
       </div>
@@ -135,11 +168,17 @@ export function Overview() {
         <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-4">
             <GitBranch className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Cross-Signal Correlations</h3>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('overview.crossSignalCorrelations')}</h3>
           </div>
           <div className="max-h-[500px] overflow-y-auto">
             <CorrelationHeatmap data={correlationMatrix} />
           </div>
+          <InsightBlock
+            accent="purple"
+            what={t('overview.correlationWhat')}
+            why={t('overview.correlationWhy')}
+            rec={t('overview.correlationRec')}
+          />
         </div>
 
         {/* Scenario Modeler */}

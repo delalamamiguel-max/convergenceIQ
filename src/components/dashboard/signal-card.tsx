@@ -2,7 +2,15 @@
 
 import { Signal } from '@/types/dashboard';
 import { Badge } from '@/components/ui/badge';
+import { useT } from '@/lib/i18n';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+
+const categoryLabelKeys: Record<string, string> = {
+  ethical: 'control.categories.ethical.label',
+  cultural: 'control.categories.cultural.label',
+  regulatory: 'control.categories.regulatory.label',
+  technological: 'control.categories.technological.label',
+};
 
 interface SignalCardProps {
   signal: Signal;
@@ -33,6 +41,7 @@ function getScoreRing(value: number): string {
 }
 
 export function SignalCard({ signal, onClick }: SignalCardProps) {
+  const t = useT();
   const TrendIcon = signal.trend === 'up' ? TrendingUp : signal.trend === 'down' ? TrendingDown : Minus;
   const trendColor = signal.trend === 'up' ? 'text-green-600 dark:text-green-400' : signal.trend === 'down' ? 'text-red-500 dark:text-red-400' : 'text-[var(--dash-text-4)]';
 
@@ -44,7 +53,7 @@ export function SignalCard({ signal, onClick }: SignalCardProps) {
     >
       <div className="flex items-start justify-between mb-3">
         <Badge variant="outline" className={`text-xs ${categoryColors[signal.category]}`}>
-          {signal.category}
+          {t(categoryLabelKeys[signal.category] ?? signal.category)}
         </Badge>
         <div className={`flex items-center gap-1.5 ${trendColor}`}>
           <TrendIcon className="w-4 h-4" />

@@ -8,6 +8,8 @@ import { scenarioVariables } from '@/lib/data/curated-datasets';
 import { computeScenarioEffects } from '@/lib/scoring-engine';
 import { ScenarioEffect } from '@/types/dashboard';
 import { Beaker, RotateCcw, ArrowRight } from 'lucide-react';
+import { InsightBlock } from './insight-block';
+import { useT } from '@/lib/i18n';
 
 const categoryBorder: Record<string, string> = {
   ethical: 'border-emerald-400/30',
@@ -23,6 +25,7 @@ const domainColors: Record<string, string> = {
 };
 
 export function ScenarioModeler() {
+  const t = useT();
   const [overrides, setOverrides] = useState<Record<string, number>>({});
   const [effects, setEffects] = useState<ScenarioEffect[]>([]);
 
@@ -45,11 +48,11 @@ export function ScenarioModeler() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2 text-sm md:text-base font-semibold text-[var(--dash-text-1)]">
           <Beaker className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-          Scenario Modeler
+          {t('scenario.title')}
         </div>
         <Button variant="ghost" size="sm" onClick={reset} className="text-sm text-[var(--dash-text-4)] hover:text-[var(--dash-text-2)]">
           <RotateCcw className="w-3.5 h-3.5 mr-1" />
-          Reset
+          {t('scenario.reset')}
         </Button>
       </div>
 
@@ -84,7 +87,7 @@ export function ScenarioModeler() {
 
       {effects.length > 0 && (
         <div>
-          <div className="text-xs text-[var(--dash-text-4)] font-medium mb-3 uppercase tracking-wide">Cascade Effects</div>
+          <div className="text-xs text-[var(--dash-text-4)] font-medium mb-3 uppercase tracking-wide">{t('scenario.cascadeEffects')}</div>
 
           <div className="space-y-2 max-h-[400px] overflow-y-auto">
             {effects.sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent)).map((effect, i) => (
@@ -109,9 +112,34 @@ export function ScenarioModeler() {
 
       {effects.length === 0 && (
         <div className="text-center py-6 text-sm text-[var(--dash-text-4)]">
-          Adjust variables above to see cascading effects across all domains
+          {t('scenario.adjustPrompt')}
         </div>
       )}
+
+      {effects.length > 0 && (() => {
+        const positiveEffects = effects.filter(e => e.changePercent > 0);
+        const negativeEffects = effects.filter(e => e.changePercent < 0);
+        const biggestEffect = effects.reduce((a, b) => Math.abs(a.changePercent) > Math.abs(b.changePercent) ? a : b);
+        const avgConfidence = effects.reduce((s, e) => s + e.confidence, 0) / effects.length;
+        return (
+          <InsightBlock
+            accent="purple"
+            what={t('scenario.insightWhat', {
+              count: effects.length,
+              positive: positiveEffects.length,
+              negative: negativeEffects.length,
+              sector: biggestEffect.targetSector,
+              domain: biggestEffect.targetDomain,
+              change: `${biggestEffect.changePercent >= 0 ? '+' : ''}${biggestEffect.changePercent.toFixed(1)}`,
+              confidence: (avgConfidence * 100).toFixed(0),
+            })}
+            why={t('scenario.insightWhy')}
+            rec={negativeEffects.length > positiveEffects.length
+              ? t('scenario.insightRecNegative', { domain: biggestEffect.targetDomain, sector: biggestEffect.targetSector })
+              : t('scenario.insightRecPositive', { sector: biggestEffect.targetSector, domain: biggestEffect.targetDomain })}
+          />
+        );
+      })()}
     </div>
   );
 }

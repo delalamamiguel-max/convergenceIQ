@@ -12,6 +12,7 @@ import {
   type ActiveListing, type JobMarketSignal,
 } from '@/lib/data/curated-datasets';
 import { useDashboardStore } from '@/lib/store';
+import { useT } from '@/lib/i18n';
 import { computeCompositeScore } from '@/lib/scoring-engine';
 import {
   Briefcase, MapPin, Globe, Building2, TreePine, Lightbulb,
@@ -19,13 +20,6 @@ import {
   Target, DollarSign, Users, AlertTriangle, CheckCircle2, Info,
   ExternalLink, Calendar, Award, MessageSquare,
 } from 'lucide-react';
-
-const geoTabs: { key: PMGeoView; label: string; icon: typeof MapPin; desc: string }[] = [
-  { key: 'us', label: 'United States', icon: Globe, desc: 'National PM market overview' },
-  { key: 'austin', label: 'Austin, TX', icon: Building2, desc: 'Austin metro PM roles' },
-  { key: 'austin-surrounding', label: 'Surrounding Areas', icon: TreePine, desc: 'Round Rock · Cedar Park · Georgetown · Leander · San Marcos · Pflugerville' },
-  { key: 'remote', label: 'Remote (US)', icon: Globe, desc: 'Remote-eligible PM roles' },
-];
 
 const rolesByGeo: Record<PMGeoView, PMRoleSignal[]> = {
   us: pmRolesUS,
@@ -40,19 +34,35 @@ const severityConfig = {
   caution: { icon: AlertTriangle, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-500/10', border: 'border-amber-200 dark:border-amber-500/20' },
 };
 
-const categoryConfig: Record<PMRecommendation['category'], { label: string; color: string }> = {
-  'role-priority': { label: 'Role Priority', color: 'text-cyan-600 dark:text-cyan-400 border-cyan-500/20 bg-cyan-500/10' },
-  'skill-gap': { label: 'Skill Gap', color: 'text-purple-600 dark:text-purple-400 border-purple-500/20 bg-purple-500/10' },
-  'location-strategy': { label: 'Location Strategy', color: 'text-emerald-600 dark:text-emerald-400 border-emerald-500/20 bg-emerald-500/10' },
-  'repositioning': { label: 'Repositioning', color: 'text-amber-600 dark:text-amber-400 border-amber-500/20 bg-amber-500/10' },
-};
-
 export function JobMarketsView() {
   const { weights, thresholds } = useDashboardStore();
+  const t = useT();
   const [activeGeo, setActiveGeo] = useState<PMGeoView>('us');
   const [expandedRole, setExpandedRole] = useState<string | null>(null);
   const [expandedInsight, setExpandedInsight] = useState<string | null>(null);
   const [expandedListing, setExpandedListing] = useState<string | null>(null);
+
+  const geoTabs: { key: PMGeoView; icon: typeof MapPin; labelKey: string; descKey: string }[] = [
+    { key: 'us', icon: Globe, labelKey: 'jobMarkets.geoTabs.us.label', descKey: 'jobMarkets.geoTabs.us.desc' },
+    { key: 'austin', icon: Building2, labelKey: 'jobMarkets.geoTabs.austin.label', descKey: 'jobMarkets.geoTabs.austin.desc' },
+    { key: 'austin-surrounding', icon: TreePine, labelKey: 'jobMarkets.geoTabs.austinSurrounding.label', descKey: 'jobMarkets.geoTabs.austinSurrounding.desc' },
+    { key: 'remote', icon: Globe, labelKey: 'jobMarkets.geoTabs.remote.label', descKey: 'jobMarkets.geoTabs.remote.desc' },
+  ];
+
+  const categoryConfig: Record<PMRecommendation['category'], { labelKey: string; color: string }> = {
+    'role-priority': { labelKey: 'jobMarkets.recommendations.categories.rolePriority', color: 'text-cyan-600 dark:text-cyan-400 border-cyan-500/20 bg-cyan-500/10' },
+    'skill-gap': { labelKey: 'jobMarkets.recommendations.categories.skillGap', color: 'text-purple-600 dark:text-purple-400 border-purple-500/20 bg-purple-500/10' },
+    'location-strategy': { labelKey: 'jobMarkets.recommendations.categories.locationStrategy', color: 'text-emerald-600 dark:text-emerald-400 border-emerald-500/20 bg-emerald-500/10' },
+    'repositioning': { labelKey: 'jobMarkets.recommendations.categories.repositioning', color: 'text-amber-600 dark:text-amber-400 border-amber-500/20 bg-amber-500/10' },
+  };
+
+  const demandTrendLabels: Record<string, string> = {
+    surging: t('jobMarkets.roles.demandTrend.surging'),
+    growing: t('jobMarkets.roles.demandTrend.growing'),
+    steady: t('jobMarkets.roles.demandTrend.steady'),
+    cooling: t('jobMarkets.roles.demandTrend.cooling'),
+    declining: t('jobMarkets.roles.demandTrend.declining'),
+  };
 
   const roles = rolesByGeo[activeGeo];
   const insights = pmMarketInsights.filter(i => i.geoView === activeGeo);
@@ -81,10 +91,10 @@ export function JobMarketsView() {
   }));
 
   const radarData = [
-    { category: 'Ethical', value: scores[0]?.breakdown.ethical || 50, fullMark: 100 },
-    { category: 'Cultural', value: scores[0]?.breakdown.cultural || 50, fullMark: 100 },
-    { category: 'Regulatory', value: scores[0]?.breakdown.regulatory || 50, fullMark: 100 },
-    { category: 'Technological', value: scores[0]?.breakdown.technological || 50, fullMark: 100 },
+    { category: t('control.categories.ethical.label'), value: scores[0]?.breakdown.ethical || 50, fullMark: 100 },
+    { category: t('control.categories.cultural.label'), value: scores[0]?.breakdown.cultural || 50, fullMark: 100 },
+    { category: t('control.categories.regulatory.label'), value: scores[0]?.breakdown.regulatory || 50, fullMark: 100 },
+    { category: t('control.categories.technological.label'), value: scores[0]?.breakdown.technological || 50, fullMark: 100 },
   ];
 
   const demandTrend = Array.from({ length: 36 }, (_, i) => {
@@ -109,8 +119,8 @@ export function JobMarketsView() {
           <Briefcase className="w-5 h-5 md:w-6 md:h-6 text-cyan-500 dark:text-cyan-400" />
         </div>
         <div>
-          <h2 className="text-lg md:text-xl font-bold text-[var(--dash-text-1)]">Product Management Job Market</h2>
-          <p className="text-sm text-[var(--dash-text-4)]">PM roles · AI PM · Technical PM · Growth PM · Product Ops · Geographic analysis</p>
+          <h2 className="text-lg md:text-xl font-bold text-[var(--dash-text-1)]">{t('jobMarkets.title')}</h2>
+          <p className="text-sm text-[var(--dash-text-4)]">{t('jobMarkets.subtitle')}</p>
         </div>
       </div>
 
@@ -131,7 +141,7 @@ export function JobMarketsView() {
               style={!active ? { backgroundColor: 'var(--dash-bg-card)' } : undefined}
             >
               <Icon className="w-4 h-4 md:w-5 md:h-5" />
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           );
         })}
@@ -139,34 +149,34 @@ export function JobMarketsView() {
 
       {/* Geo Description */}
       <div className="text-sm text-[var(--dash-text-4)] -mt-2">
-        {geoTabs.find(t => t.key === activeGeo)?.desc}
+        {t(geoTabs.find(tab => tab.key === activeGeo)?.descKey ?? '')}
       </div>
 
       {/* Summary Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard
           icon={<Users className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />}
-          label="Total PM Openings"
+          label={t('jobMarkets.stats.totalOpenings')}
           value={roles.reduce((s, r) => s + (r.openRoles || 0), 0).toLocaleString()}
-          sub={`across ${roles.length} role categories`}
+          sub={t('jobMarkets.stats.acrossRoles', { count: roles.length })}
         />
         <StatCard
           icon={<DollarSign className="w-4 h-4 text-green-500 dark:text-green-400" />}
-          label="Median Salary Range"
+          label={t('jobMarkets.stats.medianSalary')}
           value={`$${Math.min(...roles.map(r => r.medianSalary || 0)).toLocaleString().replace(/,000$/, 'K')}-${Math.max(...roles.map(r => r.medianSalary || 0)).toLocaleString().replace(/,000$/, 'K')}`}
-          sub="across all PM specialties"
+          sub={t('jobMarkets.stats.acrossSpecialties')}
         />
         <StatCard
           icon={<TrendingUp className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />}
-          label="Avg. Growth Rate"
+          label={t('jobMarkets.stats.avgGrowth')}
           value={`${(roles.reduce((s, r) => s + r.rawValue, 0) / roles.length).toFixed(0)}%`}
-          sub="projected 2024-2034"
+          sub={t('jobMarkets.stats.projected')}
         />
         <StatCard
           icon={<Target className="w-4 h-4 text-purple-500 dark:text-purple-400" />}
-          label="Highest Demand"
+          label={t('jobMarkets.stats.highestDemand')}
           value={roles.sort((a, b) => b.rawValue - a.rawValue)[0]?.label.replace(/ \(.*\)/, '').split(' ').slice(0, 2).join(' ') || '-'}
-          sub={`${roles.sort((a, b) => b.rawValue - a.rawValue)[0]?.rawValue || 0}% growth`}
+          sub={t('jobMarkets.stats.growthPct', { value: roles.sort((a, b) => b.rawValue - a.rawValue)[0]?.rawValue || 0 })}
         />
       </div>
 
@@ -174,14 +184,11 @@ export function JobMarketsView() {
       <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
         <div className="flex items-center gap-2 mb-2">
           <TrendingUp className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">PM Role Demand Over Time</h3>
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('jobMarkets.charts.demandOverTime')}</h3>
           <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">LinkedIn / BLS</Badge>
         </div>
-        <p className="text-sm text-[var(--dash-text-3)] mb-3">
-          This chart tracks the total number of open PM roles in this geography over the past 3 years, with a 12-month projection.
-          An upward trend means companies are creating new PM positions faster than they are filling them — a sign of sustained demand.
-        </p>
-        <TrendLine data={demandTrend} color="#22d3ee" label="Open PM Roles" showProjection />
+        <p className="text-sm text-[var(--dash-text-3)] mb-3">{t('jobMarkets.charts.demandDesc')}</p>
+        <TrendLine data={demandTrend} color="#22d3ee" label={t('jobMarkets.charts.openPmRoles')} showProjection />
       </div>
 
       {/* Charts Row */}
@@ -189,26 +196,20 @@ export function JobMarketsView() {
         <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Growth Rate by PM Role (%)</h3>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('jobMarkets.charts.growthRate')}</h3>
             <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">BLS Projected</Badge>
           </div>
-          <p className="text-sm text-[var(--dash-text-3)] mb-3">
-            Projected job growth over the next decade. Roles above 15% are growing significantly faster than the economy overall (7% average).
-            Higher growth means more openings, more company options, and stronger negotiating position.
-          </p>
+          <p className="text-sm text-[var(--dash-text-3)] mb-3">{t('jobMarkets.charts.growthDesc')}</p>
           <BarRanking data={growthChart} layout="vertical" height={Math.max(280, roles.length * 45)} />
         </div>
 
         <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <DollarSign className="w-4 h-4 text-green-500 dark:text-green-400" />
-            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Median Salary by Role ($K)</h3>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('jobMarkets.charts.medianSalary')}</h3>
             <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">LinkedIn / Glassdoor</Badge>
           </div>
-          <p className="text-sm text-[var(--dash-text-3)] mb-3">
-            Median base salary in thousands. This is the midpoint — half of people in each role earn more, half earn less.
-            Use this to benchmark offers and understand the salary premium for specialization.
-          </p>
+          <p className="text-sm text-[var(--dash-text-3)] mb-3">{t('jobMarkets.charts.salaryDesc')}</p>
           <BarRanking data={salaryChart} layout="vertical" height={Math.max(280, roles.length * 45)} colorScale={false} />
         </div>
       </div>
@@ -219,12 +220,9 @@ export function JobMarketsView() {
           <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
             <div className="flex items-center gap-2 mb-2">
               <Users className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-              <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Open Roles by Specialty</h3>
+              <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('jobMarkets.charts.openRoles')}</h3>
             </div>
-            <p className="text-sm text-[var(--dash-text-3)] mb-3">
-              Current open PM job postings. Higher volume means more chances to apply and interview.
-              Low-volume specialties require more targeted, fewer-but-higher-quality applications.
-            </p>
+            <p className="text-sm text-[var(--dash-text-3)] mb-3">{t('jobMarkets.charts.openRolesDesc')}</p>
             <BarRanking data={openRolesChart} layout="vertical" height={Math.max(280, openRolesChart.length * 45)} colorScale={false} />
           </div>
         )}
@@ -232,12 +230,9 @@ export function JobMarketsView() {
         <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <Target className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">PM Market Multi-Factor Analysis</h3>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('jobMarkets.charts.multiFactor')}</h3>
           </div>
-          <p className="text-sm text-[var(--dash-text-3)] mb-3">
-            How the PM job market scores across four dimensions. Technological is strongest because PM growth is driven by AI and platform expansion.
-            Cultural reflects remote-work and work-preference trends affecting PM roles.
-          </p>
+          <p className="text-sm text-[var(--dash-text-3)] mb-3">{t('jobMarkets.charts.multiFactorDesc')}</p>
           <SignalRadar data={radarData} color="#22d3ee" />
         </div>
       </div>
@@ -247,8 +242,8 @@ export function JobMarketsView() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Lightbulb className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Key Market Insights</h3>
-            <span className="text-xs text-[var(--dash-text-4)]">— what the data means and why it matters</span>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('jobMarkets.insights.title')}</h3>
+            <span className="text-xs text-[var(--dash-text-4)]">{t('jobMarkets.insights.subtitle')}</span>
           </div>
           <div className="space-y-3">
             {insights.map(insight => {
@@ -276,15 +271,15 @@ export function JobMarketsView() {
                       {expanded && (
                         <div className="mt-3 space-y-3">
                           <div>
-                            <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">What this means</div>
+                            <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('jobMarkets.insights.whatThisMeans')}</div>
                             <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{insight.explanation}</p>
                           </div>
                           <div>
-                            <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Why it matters for you</div>
+                            <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('jobMarkets.insights.whyItMattersForYou')}</div>
                             <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{insight.whyItMatters}</p>
                           </div>
                           <div className={`rounded-lg p-3 md:p-4 ${config.bg}`}>
-                            <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Recommended action</div>
+                            <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('jobMarkets.insights.recommendedAction')}</div>
                             <p className={`text-sm font-medium ${config.color}`}>{insight.recommendedAction}</p>
                           </div>
                         </div>
@@ -303,21 +298,19 @@ export function JobMarketsView() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Building2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Active Company Listings</h3>
-            <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">Curated Snapshot</Badge>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('jobMarkets.listings.title')}</h3>
+            <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">{t('jobMarkets.listings.curatedSnapshot')}</Badge>
           </div>
-          <p className="text-sm text-[var(--dash-text-3)] mb-3 ml-7">
-            Companies with active PM and PM-adjacent postings relevant to your target profile. Click any listing for a relevance explanation.
-          </p>
+          <p className="text-sm text-[var(--dash-text-3)] mb-3 ml-7">{t('jobMarkets.listings.desc')}</p>
           <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
             {/* Table Header — hidden on mobile */}
             <div className="hidden md:grid grid-cols-[1fr_1.2fr_0.8fr_0.5fr_0.6fr_0.6fr] gap-2 px-4 py-3 border-b text-xs uppercase tracking-wide font-medium text-[var(--dash-text-4)]" style={{ borderColor: 'var(--dash-border)' }}>
-              <span>Company</span>
-              <span>Role</span>
-              <span>Location</span>
-              <span>Level</span>
-              <span>Source</span>
-              <span>Posted</span>
+              <span>{t('jobMarkets.listings.company')}</span>
+              <span>{t('jobMarkets.listings.role')}</span>
+              <span>{t('jobMarkets.listings.location')}</span>
+              <span>{t('jobMarkets.listings.level')}</span>
+              <span>{t('jobMarkets.listings.source')}</span>
+              <span>{t('jobMarkets.listings.posted')}</span>
             </div>
             {/* Listing Rows */}
             {listings.map((listing, idx) => {
@@ -373,7 +366,7 @@ export function JobMarketsView() {
                   {expanded && (
                     <div className="px-4 pb-3 border-b" style={{ borderColor: 'var(--dash-border)' }}>
                       <div className="rounded-lg p-3 md:p-4 bg-emerald-50 dark:bg-emerald-500/10 md:ml-8">
-                        <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1.5">Why this role is relevant</div>
+                        <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1.5">{t('jobMarkets.listings.whyRelevant')}</div>
                         <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{listing.relevance}</p>
                         <div className="flex flex-wrap items-center gap-3 mt-2.5 pt-2.5 border-t border-emerald-200 dark:border-emerald-500/20">
                           <a
@@ -384,13 +377,13 @@ export function JobMarketsView() {
                             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-emerald-600 dark:bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-700 dark:hover:bg-emerald-600 transition-colors"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
-                            View Posting
+                            {t('jobMarkets.listings.viewPosting')}
                           </a>
                           <div className="flex items-center gap-1">
                             <Award className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                             <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{listing.seniority}</span>
                           </div>
-                          <span className="text-xs text-[var(--dash-text-4)]">Found on {listing.source}</span>
+                          <span className="text-xs text-[var(--dash-text-4)]">{t('jobMarkets.listings.foundOn', { source: listing.source })}</span>
                           <span className="text-xs text-[var(--dash-text-4)]">{listing.postedDate}</span>
                         </div>
                       </div>
@@ -402,9 +395,7 @@ export function JobMarketsView() {
           </div>
           <div className="flex items-start gap-2 mt-2.5 px-1">
             <Info className="w-4 h-4 text-[var(--dash-text-4)] mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-[var(--dash-text-4)] leading-relaxed">
-              Listings are curated snapshots from LinkedIn, company career pages, and job boards. Postings may have been filled or removed since last update. Always verify directly on the source before applying.
-            </p>
+            <p className="text-xs text-[var(--dash-text-4)] leading-relaxed">{t('jobMarkets.listings.disclaimer')}</p>
           </div>
         </div>
       )}
@@ -414,8 +405,8 @@ export function JobMarketsView() {
         <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <MessageSquare className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Job Market Signal</h3>
-            <span className="text-xs text-[var(--dash-text-4)]">— what the active postings tell us</span>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('jobMarkets.marketSignal.title')}</h3>
+            <span className="text-xs text-[var(--dash-text-4)]">{t('jobMarkets.marketSignal.subtitle')}</span>
           </div>
           <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{marketSignal.summary}</p>
         </div>
@@ -425,8 +416,8 @@ export function JobMarketsView() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Briefcase className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
-          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">PM Role Breakdown</h3>
-          <span className="text-xs text-[var(--dash-text-4)]">— click any role for full analysis</span>
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('jobMarkets.roles.title')}</h3>
+          <span className="text-xs text-[var(--dash-text-4)]">{t('jobMarkets.roles.subtitle')}</span>
         </div>
         <div className="space-y-3">
           {roles.map(role => {
@@ -453,10 +444,10 @@ export function JobMarketsView() {
                     <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)] truncate">{role.label}</h4>
                     <div className="flex flex-wrap items-center gap-3 mt-1">
                       {role.medianSalary && <span className="text-sm text-[var(--dash-text-3)]">${role.medianSalary.toLocaleString()}</span>}
-                      {role.openRoles && <span className="text-sm text-[var(--dash-text-4)]">{role.openRoles.toLocaleString()} openings</span>}
+                      {role.openRoles && <span className="text-sm text-[var(--dash-text-4)]">{t('jobMarkets.roles.openings', { n: role.openRoles.toLocaleString() })}</span>}
                       {role.demandTrend && (
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${demandColor}`}>
-                          {role.demandTrend}
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${demandColor}`}>
+                          {demandTrendLabels[role.demandTrend] ?? role.demandTrend}
                         </span>
                       )}
                     </div>
@@ -473,22 +464,22 @@ export function JobMarketsView() {
                   <div className="px-4 md:px-5 pb-4 md:pb-5 border-t border-[var(--dash-border)]">
                     <div className="mt-4 space-y-3">
                       <div>
-                        <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">What this means</div>
+                        <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('jobMarkets.roles.whatThisMeans')}</div>
                         <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{role.explanation}</p>
                       </div>
                       <div>
-                        <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Why it matters for you</div>
+                        <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('jobMarkets.roles.whyItMattersForYou')}</div>
                         <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{role.whyItMatters}</p>
                       </div>
                       <div className="rounded-lg p-3 md:p-4 bg-cyan-50 dark:bg-cyan-500/10">
-                        <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Recommended action</div>
+                        <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('jobMarkets.roles.recommendedAction')}</div>
                         <p className="text-sm font-medium text-cyan-700 dark:text-cyan-300">{role.recommendedAction}</p>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
-                        <MiniStat label="Growth Rate" value={`${role.rawValue}%`} sub="10yr projected" />
-                        <MiniStat label="Median Salary" value={role.medianSalary ? `$${(role.medianSalary / 1000).toFixed(0)}K` : '-'} sub="annual base" />
-                        <MiniStat label="Open Roles" value={role.openRoles?.toLocaleString() || '-'} sub="current postings" />
-                        <MiniStat label="Signal Score" value={`${role.value}/100`} sub="composite" />
+                        <MiniStat label={t('jobMarkets.roles.growthRate')} value={`${role.rawValue}%`} sub={t('jobMarkets.roles.tenYrProjected')} />
+                        <MiniStat label={t('jobMarkets.roles.medianSalary')} value={role.medianSalary ? `$${(role.medianSalary / 1000).toFixed(0)}K` : '-'} sub={t('jobMarkets.roles.annualBase')} />
+                        <MiniStat label={t('jobMarkets.roles.openRoles')} value={role.openRoles?.toLocaleString() || '-'} sub={t('jobMarkets.roles.currentPostings')} />
+                        <MiniStat label={t('jobMarkets.roles.signalScore')} value={`${role.value}/100`} sub={t('jobMarkets.roles.composite')} />
                       </div>
                     </div>
                   </div>
@@ -504,8 +495,8 @@ export function JobMarketsView() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Target className="w-4 h-4 text-green-500 dark:text-green-400" />
-            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Recommendations</h3>
-            <span className="text-xs text-[var(--dash-text-4)]">— what to do with this information</span>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('jobMarkets.recommendations.title')}</h3>
+            <span className="text-xs text-[var(--dash-text-4)]">{t('jobMarkets.recommendations.subtitle')}</span>
           </div>
           <div className="space-y-3">
             {recommendations.sort((a, b) => a.priority - b.priority).map((rec, i) => {
@@ -523,7 +514,7 @@ export function JobMarketsView() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{rec.title}</h4>
-                        <Badge variant="outline" className={`text-xs ${cat.color}`}>{cat.label}</Badge>
+                        <Badge variant="outline" className={`text-xs ${cat.color}`}>{t(cat.labelKey)}</Badge>
                       </div>
                       <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{rec.body}</p>
                     </div>

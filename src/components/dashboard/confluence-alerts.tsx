@@ -2,7 +2,9 @@
 
 import { confluenceAlerts } from '@/lib/data/curated-datasets';
 import { Badge } from '@/components/ui/badge';
+import { useT } from '@/lib/i18n';
 import { Zap, AlertTriangle, Info } from 'lucide-react';
+import { InsightBlock } from './insight-block';
 
 const severityConfig = {
   high: {
@@ -32,6 +34,11 @@ const domainLabels = {
 };
 
 export function ConfluenceAlerts() {
+  const t = useT();
+  const highCount = confluenceAlerts.filter(a => a.severity === 'high').length;
+  const mediumCount = confluenceAlerts.filter(a => a.severity === 'medium').length;
+  const crossDomainCount = confluenceAlerts.filter(a => a.domains.length > 1).length;
+
   return (
     <div className="space-y-3">
       {confluenceAlerts.map(alert => {
@@ -46,7 +53,7 @@ export function ConfluenceAlerts() {
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                   <span className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{alert.sector}</span>
                   <Badge variant="outline" className={`text-xs ${config.badge}`}>
-                    {alert.signalCount} signals
+                    {t('confluence.signalsBadge', { n: alert.signalCount })}
                   </Badge>
                   {alert.domains.map(d => (
                     <Badge key={d} variant="outline" className="text-xs bg-[var(--dash-bg-muted)] text-[var(--dash-text-3)] border-[var(--dash-border)]">
@@ -63,6 +70,14 @@ export function ConfluenceAlerts() {
           </div>
         );
       })}
+      <InsightBlock
+        accent="amber"
+        what={t('confluence.insightWhat', { count: confluenceAlerts.length, high: highCount, medium: mediumCount, crossDomain: crossDomainCount })}
+        why={t('confluence.insightWhy')}
+        rec={highCount > 0
+          ? t('confluence.insightRecHigh', { high: highCount, s: highCount > 1 ? 's' : '' })
+          : t('confluence.insightRecNone')}
+      />
     </div>
   );
 }

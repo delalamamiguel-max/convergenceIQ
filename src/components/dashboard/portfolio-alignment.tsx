@@ -13,12 +13,13 @@ import {
   BarChart3, Target, Lightbulb, RefreshCw, FileText, Scale, Building2,
   DollarSign, Hash, ShieldAlert,
 } from 'lucide-react';
+import { useT } from '@/lib/i18n';
 
-const actionConfig: Record<string, { icon: typeof TrendingUp; color: string; label: string; bg: string }> = {
-  hold: { icon: Minus, color: 'text-[var(--dash-text-4)]', label: 'Hold', bg: 'bg-gray-50 dark:bg-gray-500/10 border-gray-200 dark:border-gray-500/20' },
-  'buy more': { icon: TrendingUp, color: 'text-green-600 dark:text-green-400', label: 'Buy More', bg: 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20' },
-  reduce: { icon: TrendingDown, color: 'text-amber-600 dark:text-amber-400', label: 'Reduce', bg: 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' },
-  exit: { icon: X, color: 'text-red-600 dark:text-red-400', label: 'Exit', bg: 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20' },
+const actionConfig: Record<string, { icon: typeof TrendingUp; color: string; labelKey: string; bg: string }> = {
+  hold: { icon: Minus, color: 'text-[var(--dash-text-4)]', labelKey: 'portfolio.actions.hold', bg: 'bg-gray-50 dark:bg-gray-500/10 border-gray-200 dark:border-gray-500/20' },
+  'buy more': { icon: TrendingUp, color: 'text-green-600 dark:text-green-400', labelKey: 'portfolio.actions.buyMore', bg: 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20' },
+  reduce: { icon: TrendingDown, color: 'text-amber-600 dark:text-amber-400', labelKey: 'portfolio.actions.reduce', bg: 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20' },
+  exit: { icon: X, color: 'text-red-600 dark:text-red-400', labelKey: 'portfolio.actions.exit', bg: 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20' },
 };
 
 const recColors: Record<string, string> = {
@@ -52,6 +53,7 @@ function fmtPrice(n: number): string {
 }
 
 export function PortfolioAlignment() {
+  const t = useT();
   const [tickerInput, setTickerInput] = useState('');
   const [holdings, setHoldings] = useState<PortfolioHolding[]>([]);
   const [analyzed, setAnalyzed] = useState(false);
@@ -75,8 +77,8 @@ export function PortfolioAlignment() {
     if (!raw) return;
     const tickers = raw.split(/[\s,]+/).filter(Boolean);
     const newHoldings = tickers
-      .filter(t => !holdings.find(h => h.ticker === t))
-      .map(t => ({ ticker: t, shares: 0 }));
+      .filter(sym => !holdings.find(h => h.ticker === sym))
+      .map(sym => ({ ticker: sym, shares: 0 }));
     setHoldings([...holdings, ...newHoldings]);
     setTickerInput('');
     setAnalyzed(false);
@@ -150,15 +152,15 @@ export function PortfolioAlignment() {
           <PieChart className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
         </div>
         <div>
-          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Portfolio Alignment</h3>
-          <p className="text-xs text-[var(--dash-text-4)]">Enter your holdings to see how they align with the report's insights</p>
+          <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('portfolio.title')}</h3>
+          <p className="text-xs text-[var(--dash-text-4)]">{t('portfolio.subtitle')}</p>
         </div>
       </div>
 
       {/* Ticker Input */}
       <div className="rounded-xl border p-4 md:p-5 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
         <div className="text-xs text-[var(--dash-text-2)] mb-3">
-          Enter the ticker symbols of your stocks, ETFs, or funds. Then specify how many shares you own for each.
+          {t('portfolio.inputDesc')}
         </div>
         <div className="flex gap-2">
           <input
@@ -166,7 +168,7 @@ export function PortfolioAlignment() {
             value={tickerInput}
             onChange={e => setTickerInput(e.target.value.toUpperCase())}
             onKeyDown={e => { if (e.key === 'Enter') addTicker(); }}
-            placeholder="e.g. AAPL, MSFT, VTI, QQQ, VOO"
+            placeholder={t('portfolio.placeholder')}
             className="flex-1 px-3 py-2 rounded-lg border text-sm bg-transparent text-[var(--dash-text-1)] placeholder:text-[var(--dash-text-4)]"
             style={{ borderColor: 'var(--dash-border)' }}
           />
@@ -177,19 +179,19 @@ export function PortfolioAlignment() {
             className="text-xs border-indigo-500/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10"
           >
             <Plus className="w-3 h-3 mr-1" />
-            Add
+            {t('portfolio.add')}
           </Button>
         </div>
 
         {/* Holdings Input Table */}
         {holdings.length > 0 && (
-          <div className="mt-4 space-y-1">
-            {/* Header */}
-            <div className="hidden sm:grid grid-cols-[1fr_100px_120px_100px_40px] gap-2 px-2 text-xs text-[var(--dash-text-4)] font-medium">
-              <div>Ticker</div>
-              <div className="text-right">Shares</div>
-              <div className="text-right">Cost Basis</div>
-              <div className="text-right">Price</div>
+          <div className="mt-4 space-y-1.5">
+            {/* Desktop / Tablet Header */}
+            <div className="hidden md:grid grid-cols-[minmax(160px,1.5fr)_minmax(110px,0.8fr)_minmax(130px,0.9fr)_minmax(110px,0.7fr)_40px] gap-4 px-3 text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide">
+              <div>{t('portfolio.table.tickerCompany')}</div>
+              <div className="text-right">{t('portfolio.table.shares')}</div>
+              <div className="text-right">{t('portfolio.table.costBasis')}</div>
+              <div className="text-right">{t('portfolio.table.currentPrice')}</div>
               <div />
             </div>
 
@@ -199,58 +201,106 @@ export function PortfolioAlignment() {
               return (
                 <div
                   key={h.ticker}
-                  className="sm:grid sm:grid-cols-[1fr_100px_120px_100px_40px] gap-2 items-center rounded-lg border p-2 sm:p-2 transition-colors"
+                  className="rounded-lg border p-3 transition-colors"
                   style={{ backgroundColor: 'var(--dash-bg-muted)', borderColor: 'var(--dash-border)' }}
                 >
-                  {/* Ticker info */}
-                  <div className="flex items-center gap-2 mb-2 sm:mb-0">
-                    <span className="font-mono font-bold text-sm text-[var(--dash-text-1)]">{h.ticker}</span>
-                    {profile && <span className="text-xs text-[var(--dash-text-4)] truncate hidden sm:inline">{profile.name}</span>}
-                    {!profile && <span className="text-xs text-amber-500">Unknown ticker</span>}
-                  </div>
+                  {/* Desktop / Tablet row */}
+                  <div className="hidden md:grid grid-cols-[minmax(160px,1.5fr)_minmax(110px,0.8fr)_minmax(130px,0.9fr)_minmax(110px,0.7fr)_40px] gap-4 items-center">
+                    {/* Ticker + Company */}
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="font-mono font-bold text-sm text-[var(--dash-text-1)] flex-shrink-0">{h.ticker}</span>
+                      {profile && <span className="text-xs text-[var(--dash-text-4)] truncate">{profile.name}</span>}
+                      {!profile && <span className="text-xs text-amber-500 flex-shrink-0">{t('portfolio.unknownTicker')}</span>}
+                    </div>
 
-                  {/* Mobile layout: shares + cost basis side by side */}
-                  <div className="flex gap-2 sm:contents">
-                    <div className="flex-1 sm:flex-none">
-                      <div className="text-xs text-[var(--dash-text-4)] sm:hidden mb-0.5">Shares</div>
+                    {/* Shares */}
+                    <input
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={h.shares || ''}
+                      onChange={e => updateShares(h.ticker, parseFloat(e.target.value) || 0)}
+                      placeholder="0"
+                      className="w-full min-w-[90px] px-3 py-2 rounded-lg border text-sm bg-transparent text-[var(--dash-text-1)] text-right tabular-nums"
+                      style={{ borderColor: 'var(--dash-border)' }}
+                    />
+
+                    {/* Cost Basis */}
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--dash-text-4)]">$</span>
                       <input
                         type="number"
                         min={0}
-                        step={1}
-                        value={h.shares || ''}
-                        onChange={e => updateShares(h.ticker, parseFloat(e.target.value) || 0)}
-                        placeholder="0"
-                        className="w-full sm:w-auto px-2 py-1.5 rounded-lg border text-sm bg-transparent text-[var(--dash-text-1)] text-right"
+                        step={0.01}
+                        value={h.costBasis ?? ''}
+                        onChange={e => updateCostBasis(h.ticker, e.target.value ? parseFloat(e.target.value) : undefined)}
+                        placeholder="optional"
+                        className="w-full min-w-[100px] pl-6 pr-3 py-2 rounded-lg border text-sm bg-transparent text-[var(--dash-text-1)] text-right tabular-nums"
                         style={{ borderColor: 'var(--dash-border)' }}
                       />
                     </div>
-                    <div className="flex-1 sm:flex-none">
-                      <div className="text-xs text-[var(--dash-text-4)] sm:hidden mb-0.5">Avg Cost</div>
-                      <div className="relative">
-                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-[var(--dash-text-4)]">$</span>
-                        <input
-                          type="number"
-                          min={0}
-                          step={0.01}
-                          value={h.costBasis ?? ''}
-                          onChange={e => updateCostBasis(h.ticker, e.target.value ? parseFloat(e.target.value) : undefined)}
-                          placeholder="optional"
-                          className="w-full sm:w-auto pl-5 pr-2 py-1.5 rounded-lg border text-sm bg-transparent text-[var(--dash-text-1)] text-right"
-                          style={{ borderColor: 'var(--dash-border)' }}
-                        />
-                      </div>
-                    </div>
 
-                    {/* Price (read-only) */}
-                    <div className="hidden sm:flex items-center justify-end">
-                      <span className="text-sm text-[var(--dash-text-3)]">{price ? fmtPrice(price) : '—'}</span>
+                    {/* Current Price (read-only) */}
+                    <div className="flex items-center justify-end px-3 py-2 rounded-lg border border-transparent" style={{ backgroundColor: 'var(--dash-bg-card)' }}>
+                      <span className="text-sm font-medium text-[var(--dash-text-2)] tabular-nums">{price ? fmtPrice(price) : '—'}</span>
                     </div>
 
                     {/* Remove */}
                     <div className="flex items-center justify-center">
-                      <button onClick={() => removeTicker(h.ticker)} className="text-[var(--dash-text-4)] hover:text-red-500 p-1">
-                        <X className="w-3.5 h-3.5" />
+                      <button onClick={() => removeTicker(h.ticker)} className="text-[var(--dash-text-4)] hover:text-red-500 p-1.5 rounded-md hover:bg-red-500/10 transition-colors">
+                        <X className="w-4 h-4" />
                       </button>
+                    </div>
+                  </div>
+
+                  {/* Mobile layout */}
+                  <div className="md:hidden space-y-3">
+                    {/* Ticker row with remove button */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-mono font-bold text-sm text-[var(--dash-text-1)] flex-shrink-0">{h.ticker}</span>
+                        {profile && <span className="text-xs text-[var(--dash-text-4)] truncate">{profile.name}</span>}
+                        {!profile && <span className="text-xs text-amber-500 flex-shrink-0">{t('portfolio.unknownTicker')}</span>}
+                      </div>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        {price && <span className="text-sm font-medium text-[var(--dash-text-2)] tabular-nums">{fmtPrice(price)}</span>}
+                        <button onClick={() => removeTicker(h.ticker)} className="text-[var(--dash-text-4)] hover:text-red-500 p-1 rounded-md hover:bg-red-500/10 transition-colors">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Shares + Cost Basis side by side */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs text-[var(--dash-text-4)] mb-1 block">{t('portfolio.table.shares')}</label>
+                        <input
+                          type="number"
+                          min={0}
+                          step={1}
+                          value={h.shares || ''}
+                          onChange={e => updateShares(h.ticker, parseFloat(e.target.value) || 0)}
+                          placeholder="0"
+                          className="w-full px-3 py-2 rounded-lg border text-sm bg-transparent text-[var(--dash-text-1)] text-right tabular-nums"
+                          style={{ borderColor: 'var(--dash-border)' }}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-[var(--dash-text-4)] mb-1 block">{t('portfolio.table.avgCost')}</label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--dash-text-4)]">$</span>
+                          <input
+                            type="number"
+                            min={0}
+                            step={0.01}
+                            value={h.costBasis ?? ''}
+                            onChange={e => updateCostBasis(h.ticker, e.target.value ? parseFloat(e.target.value) : undefined)}
+                            placeholder="optional"
+                            className="w-full pl-6 pr-3 py-2 rounded-lg border text-sm bg-transparent text-[var(--dash-text-1)] text-right tabular-nums"
+                            style={{ borderColor: 'var(--dash-border)' }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -264,19 +314,19 @@ export function PortfolioAlignment() {
           <div className="mt-3 rounded-lg border p-3 space-y-2" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
             <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
               <div>
-                <div className="text-xs text-[var(--dash-text-4)]">Total Value</div>
+                <div className="text-xs text-[var(--dash-text-4)]">{t('portfolio.summary.totalValue')}</div>
                 <div className="text-base font-bold text-[var(--dash-text-1)]">{fmtUsd(valuation.totalValue)}</div>
               </div>
               <div>
-                <div className="text-xs text-[var(--dash-text-4)]">Holdings</div>
+                <div className="text-xs text-[var(--dash-text-4)]">{t('portfolio.summary.holdings')}</div>
                 <div className="text-base font-bold text-[var(--dash-text-1)]">{valuation.holdings.length}</div>
               </div>
               <div>
-                <div className="text-xs text-[var(--dash-text-4)]">Top Holding</div>
+                <div className="text-xs text-[var(--dash-text-4)]">{t('portfolio.summary.topHolding')}</div>
                 <div className="text-base font-bold text-[var(--dash-text-1)]">{valuation.topHoldingPct.toFixed(1)}%</div>
               </div>
               <div>
-                <div className="text-xs text-[var(--dash-text-4)]">Concentration</div>
+                <div className="text-xs text-[var(--dash-text-4)]">{t('portfolio.summary.concentration')}</div>
                 <div className={`text-base font-bold capitalize ${
                   valuation.concentrationRisk === 'high' ? 'text-red-500' :
                   valuation.concentrationRisk === 'moderate' ? 'text-amber-500' :
@@ -326,7 +376,7 @@ export function PortfolioAlignment() {
               className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white"
             >
               <BarChart3 className="w-3 h-3 mr-1" />
-              Analyze Portfolio
+              {t('portfolio.analyzePortfolio')}
             </Button>
             <Button
               variant="ghost"
@@ -335,7 +385,7 @@ export function PortfolioAlignment() {
               className="text-xs text-[var(--dash-text-4)] hover:text-[var(--dash-text-2)]"
             >
               <Trash2 className="w-3 h-3 mr-1" />
-              Clear All
+              {t('portfolio.clearAll')}
             </Button>
           </div>
         )}
@@ -361,10 +411,10 @@ export function PortfolioAlignment() {
             )}
             <div>
               <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">
-                Portfolio-Level Summary: <span className="capitalize">{summary.overallAlignment}</span>
+                {t('portfolio.summary.portfolioSummary')} <span className="capitalize">{summary.overallAlignment}</span>
               </h4>
               <div className="text-xs text-[var(--dash-text-4)]">
-                Weighted alignment score: <span className={`font-bold ${scoreColor(summary.score)}`}>{summary.score}/10</span>
+                {t('portfolio.summary.weightedScore')} <span className={`font-bold ${scoreColor(summary.score)}`}>{summary.score}/10</span>
               </div>
             </div>
           </div>
@@ -381,7 +431,9 @@ export function PortfolioAlignment() {
               <div className="flex items-center gap-1.5">
                 <ShieldAlert className={`w-3.5 h-3.5 ${valuation.concentrationRisk === 'high' ? 'text-red-500' : 'text-amber-500'}`} />
                 <span className={`text-xs font-medium ${valuation.concentrationRisk === 'high' ? 'text-red-700 dark:text-red-400' : 'text-amber-700 dark:text-amber-400'}`}>
-                  {valuation.concentrationRisk === 'high' ? 'High' : 'Moderate'} concentration risk — top holding is {valuation.topHoldingPct.toFixed(1)}% of portfolio (HHI: {Math.round(valuation.concentrationHHI)})
+                  {valuation.concentrationRisk === 'high'
+                    ? t('portfolio.summary.concHigh', { pct: valuation.topHoldingPct.toFixed(1), hhi: Math.round(valuation.concentrationHHI) })
+                    : t('portfolio.summary.concModerate', { pct: valuation.topHoldingPct.toFixed(1), hhi: Math.round(valuation.concentrationHHI) })}
                 </span>
               </div>
             </div>
@@ -390,7 +442,7 @@ export function PortfolioAlignment() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {summary.strengths.length > 0 && (
               <div className="rounded-lg p-3 bg-green-50 dark:bg-green-500/5 border border-green-200 dark:border-green-500/10">
-                <div className="text-xs uppercase tracking-wide text-green-700 dark:text-green-400 font-medium mb-1.5">Strengths</div>
+                <div className="text-xs uppercase tracking-wide text-green-700 dark:text-green-400 font-medium mb-1.5">{t('portfolio.summary.strengths')}</div>
                 <ul className="space-y-1.5">
                   {summary.strengths.map((s, i) => (
                     <li key={i} className="text-sm text-green-800 dark:text-green-300 leading-relaxed flex gap-1.5">
@@ -402,7 +454,7 @@ export function PortfolioAlignment() {
             )}
             {summary.gaps.length > 0 && (
               <div className="rounded-lg p-3 bg-amber-50 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/10">
-                <div className="text-xs uppercase tracking-wide text-amber-700 dark:text-amber-400 font-medium mb-1.5">Gaps & Watchouts</div>
+                <div className="text-xs uppercase tracking-wide text-amber-700 dark:text-amber-400 font-medium mb-1.5">{t('portfolio.summary.gaps')}</div>
                 <ul className="space-y-1.5">
                   {summary.gaps.map((g, i) => (
                     <li key={i} className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed flex gap-1.5">
@@ -421,8 +473,8 @@ export function PortfolioAlignment() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Briefcase className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-            <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Holding-by-Holding Analysis</h4>
-            <span className="text-xs text-[var(--dash-text-4)]">— click any holding for full detail</span>
+            <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('portfolio.analysis.title')}</h4>
+            <span className="text-xs text-[var(--dash-text-4)]">{t('portfolio.analysis.subtitle')}</span>
           </div>
 
           <div className="space-y-2">
@@ -464,8 +516,8 @@ export function PortfolioAlignment() {
                         )}
                       </div>
                     </div>
-                    <Badge variant="outline" className={`text-xs capitalize ${recColors[a.recommendation]}`}>
-                      {a.recommendation}
+                    <Badge variant="outline" className={`text-xs ${recColors[a.recommendation]}`}>
+                      {actionConfig[a.recommendation] ? t(actionConfig[a.recommendation].labelKey) : a.recommendation}
                     </Badge>
                     {expanded ? <ChevronUp className="w-4 h-4 text-[var(--dash-text-4)]" /> : <ChevronDown className="w-4 h-4 text-[var(--dash-text-4)]" />}
                   </div>
@@ -478,20 +530,20 @@ export function PortfolioAlignment() {
                         {hv && hv.marketValue > 0 && (
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <div>
-                              <div className="text-xs text-[var(--dash-text-4)]">Shares</div>
+                              <div className="text-xs text-[var(--dash-text-4)]">{t('portfolio.table.shares')}</div>
                               <div className="text-sm font-bold text-[var(--dash-text-1)]">{hv.shares}</div>
                             </div>
                             <div>
-                              <div className="text-xs text-[var(--dash-text-4)]">Market Value</div>
+                              <div className="text-xs text-[var(--dash-text-4)]">{t('portfolio.analysis.marketValue')}</div>
                               <div className="text-sm font-bold text-[var(--dash-text-1)]">{fmtUsd(hv.marketValue)}</div>
                             </div>
                             <div>
-                              <div className="text-xs text-[var(--dash-text-4)]">Allocation</div>
+                              <div className="text-xs text-[var(--dash-text-4)]">{t('portfolio.analysis.allocation')}</div>
                               <div className="text-sm font-bold text-[var(--dash-text-1)]">{hv.allocationPct.toFixed(1)}%</div>
                             </div>
                             {hv.gainLoss != null && (
                               <div>
-                                <div className="text-xs text-[var(--dash-text-4)]">Gain/Loss</div>
+                                <div className="text-xs text-[var(--dash-text-4)]">{t('portfolio.analysis.gainLoss')}</div>
                                 <div className={`text-sm font-bold ${hv.gainLoss >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
                                   {hv.gainLoss >= 0 ? '+' : ''}{fmtUsd(Math.abs(hv.gainLoss))} ({hv.gainLossPct!.toFixed(1)}%)
                                 </div>
@@ -500,16 +552,16 @@ export function PortfolioAlignment() {
                           </div>
                         )}
                         <div>
-                          <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Alignment Explanation</div>
+                          <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('portfolio.analysis.alignmentExplanation')}</div>
                           <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{a.explanation}</p>
                         </div>
                         <div>
-                          <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">Key Risks & Watchouts</div>
+                          <div className="text-xs uppercase tracking-wide text-[var(--dash-text-4)] font-medium mb-1">{t('portfolio.analysis.risksWatchouts')}</div>
                           <p className="text-xs text-[var(--dash-text-2)] leading-relaxed">{a.risks}</p>
                         </div>
                         <div className={`rounded-lg p-3 border ${recColors[a.recommendation]}`}>
-                          <div className="text-xs uppercase tracking-wide font-medium mb-1">Recommendation</div>
-                          <p className="text-xs font-medium capitalize">{a.recommendation}</p>
+                          <div className="text-xs uppercase tracking-wide font-medium mb-1">{t('portfolio.analysis.recommendation')}</div>
+                          <p className="text-xs font-medium">{actionConfig[a.recommendation] ? t(actionConfig[a.recommendation].labelKey) : a.recommendation}</p>
                         </div>
                       </div>
                     </div>
@@ -521,10 +573,10 @@ export function PortfolioAlignment() {
 
           {/* Score Legend */}
           <div className="mt-3 flex flex-wrap gap-4 text-xs text-[var(--dash-text-4)]">
-            <span><span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-1" />1-3: Low alignment</span>
-            <span><span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1" />4-6: Moderate</span>
-            <span><span className="inline-block w-2 h-2 rounded-full bg-cyan-500 mr-1" />7-8: Strong</span>
-            <span><span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1" />9-10: Very strong</span>
+            <span><span className="inline-block w-2 h-2 rounded-full bg-red-500 mr-1" />{t('portfolio.analysis.legend.low')}</span>
+            <span><span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1" />{t('portfolio.analysis.legend.moderate')}</span>
+            <span><span className="inline-block w-2 h-2 rounded-full bg-cyan-500 mr-1" />{t('portfolio.analysis.legend.strong')}</span>
+            <span><span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1" />{t('portfolio.analysis.legend.veryStrong')}</span>
           </div>
         </div>
       )}
@@ -534,7 +586,7 @@ export function PortfolioAlignment() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <RefreshCw className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-            <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Revised Portfolio View</h4>
+            <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('portfolio.revised.title')}</h4>
             {!showRevised && (
               <Button
                 variant="outline"
@@ -542,14 +594,14 @@ export function PortfolioAlignment() {
                 onClick={() => setShowRevised(true)}
                 className="ml-2 text-xs border-indigo-500/30 text-indigo-600 dark:text-indigo-400"
               >
-                Generate Revised View
+                {t('portfolio.revised.generateBtn')}
               </Button>
             )}
           </div>
 
           {!showRevised && (
             <div className="text-xs text-[var(--dash-text-3)] rounded-xl border p-4" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
-              This shows what a more aligned portfolio could look like based on the report's insights. Uses your current holdings as the starting point. Click "Generate Revised View" to see suggestions.
+              {t('portfolio.revised.previewDesc')}
             </div>
           )}
 
@@ -558,13 +610,13 @@ export function PortfolioAlignment() {
               <div className="rounded-xl border p-4" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
                 <div className="flex items-center gap-2 mb-3">
                   <Lightbulb className="w-4 h-4 text-amber-500" />
-                  <span className="text-xs text-amber-600 dark:text-amber-400 font-medium uppercase tracking-wide">Educational Scenario — Not Financial Advice</span>
+                  <span className="text-xs text-amber-600 dark:text-amber-400 font-medium uppercase tracking-wide">{t('portfolio.revised.disclaimer')}</span>
                 </div>
                 <p className="text-xs text-[var(--dash-text-2)] leading-relaxed mb-1">
-                  This revised view shows how your portfolio could be adjusted to better align with the report's data signals. Recommendations are expressed as target share counts based on current market prices.
+                  {t('portfolio.revised.disclaimerDesc')}
                 </p>
                 <p className="text-xs text-[var(--dash-text-4)]">
-                  All suggestions are scenario-based and educational. Consult a financial advisor before making investment changes.
+                  {t('portfolio.revised.disclaimerNote')}
                 </p>
               </div>
 
@@ -573,7 +625,7 @@ export function PortfolioAlignment() {
                   const ac = actionConfig[r.action];
                   const ActionIcon = ac.icon;
                   const shareDiff = r.targetShares - r.currentShares;
-                  const taxInfo = taxImplications.find(t => t.ticker === r.ticker);
+                  const taxInfo = taxImplications.find(ti => ti.ticker === r.ticker);
                   return (
                     <div
                       key={r.ticker}
@@ -584,23 +636,23 @@ export function PortfolioAlignment() {
                       <div className="flex items-center gap-3 mb-3">
                         <span className="text-sm font-bold font-mono text-[var(--dash-text-1)]">{r.ticker}</span>
                         <span className="text-xs text-[var(--dash-text-3)] truncate flex-1">{r.name}</span>
-                        <Badge variant="outline" className={`text-xs capitalize border ${ac.bg} ${ac.color}`}>
+                        <Badge variant="outline" className={`text-xs border ${ac.bg} ${ac.color}`}>
                           <ActionIcon className="w-3 h-3 mr-1" />
-                          {ac.label}
+                          {t(ac.labelKey)}
                         </Badge>
                       </div>
 
                       {/* Current → Target grid */}
                       <div className="grid grid-cols-2 gap-3 mb-3">
                         <div className="rounded-lg border p-2.5" style={{ borderColor: 'var(--dash-border)' }}>
-                          <div className="text-xs text-[var(--dash-text-4)] mb-1">Current Position</div>
-                          <div className="text-sm font-bold text-[var(--dash-text-1)]">{r.currentShares} shares</div>
+                          <div className="text-xs text-[var(--dash-text-4)] mb-1">{t('portfolio.revised.currentPosition')}</div>
+                          <div className="text-sm font-bold text-[var(--dash-text-1)]">{r.currentShares} {t('portfolio.revised.shares')}</div>
                           <div className="text-xs text-[var(--dash-text-3)]">{fmtUsd(r.currentValue)} · {r.currentPct}%</div>
                         </div>
                         <div className={`rounded-lg border p-2.5 ${r.action !== 'hold' ? ac.bg : ''}`} style={r.action === 'hold' ? { borderColor: 'var(--dash-border)' } : {}}>
-                          <div className="text-xs text-[var(--dash-text-4)] mb-1">Target Position</div>
+                          <div className="text-xs text-[var(--dash-text-4)] mb-1">{t('portfolio.revised.targetPosition')}</div>
                           <div className={`text-sm font-bold ${r.action !== 'hold' ? ac.color : 'text-[var(--dash-text-1)]'}`}>
-                            {r.targetShares} shares
+                            {r.targetShares} {t('portfolio.revised.shares')}
                           </div>
                           <div className="text-xs text-[var(--dash-text-3)]">{fmtUsd(r.targetValue)} · {r.targetPct}%</div>
                         </div>
@@ -611,11 +663,11 @@ export function PortfolioAlignment() {
                         <div className={`flex items-center gap-1.5 text-xs font-medium mb-2 ${ac.color}`}>
                           <ActionIcon className="w-3 h-3" />
                           {r.action === 'exit' ? (
-                            <span>Sell all {r.currentShares} shares (est. {fmtUsd(r.currentValue)})</span>
+                            <span>{t('portfolio.revised.sellAll', { shares: r.currentShares, value: fmtUsd(r.currentValue) })}</span>
                           ) : r.action === 'buy more' ? (
-                            <span>Buy {shareDiff} more shares (est. {fmtUsd(Math.abs(shareDiff) * (r.targetValue / Math.max(r.targetShares, 1)))})</span>
+                            <span>{t('portfolio.revised.buyMore', { shares: shareDiff, value: fmtUsd(Math.abs(shareDiff) * (r.targetValue / Math.max(r.targetShares, 1))) })}</span>
                           ) : (
-                            <span>Sell {Math.abs(shareDiff)} shares (est. {fmtUsd(Math.abs(shareDiff) * (r.currentValue / Math.max(r.currentShares, 1)))})</span>
+                            <span>{t('portfolio.revised.sellShares', { shares: Math.abs(shareDiff), value: fmtUsd(Math.abs(shareDiff) * (r.currentValue / Math.max(r.currentShares, 1))) })}</span>
                           )}
                         </div>
                       )}
@@ -627,25 +679,25 @@ export function PortfolioAlignment() {
                         <div className="mt-3 border-t border-[var(--dash-border)] pt-3 space-y-2">
                           <div className="flex items-center gap-1.5 mb-1">
                             <Scale className="w-3 h-3 text-violet-500" />
-                            <span className="text-xs uppercase tracking-wide text-violet-600 dark:text-violet-400 font-medium">Tax Context</span>
+                            <span className="text-xs uppercase tracking-wide text-violet-600 dark:text-violet-400 font-medium">{t('portfolio.tax.taxContext')}</span>
                           </div>
                           {r.action !== 'hold' && (
                             <div>
-                              <div className="text-xs text-[var(--dash-text-4)] font-medium">Investment Rationale</div>
+                              <div className="text-xs text-[var(--dash-text-4)] font-medium">{t('portfolio.tax.investmentRationale')}</div>
                               <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{taxInfo.investmentRationale}</p>
                             </div>
                           )}
                           <div>
-                            <div className="text-xs text-[var(--dash-text-4)] font-medium">Tax Considerations</div>
+                            <div className="text-xs text-[var(--dash-text-4)] font-medium">{t('portfolio.tax.taxConsiderations')}</div>
                             <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{taxInfo.taxConsiderations}</p>
                           </div>
                           <div>
-                            <div className="text-xs text-[var(--dash-text-4)] font-medium">Account Guidance</div>
+                            <div className="text-xs text-[var(--dash-text-4)] font-medium">{t('portfolio.tax.accountGuidance')}</div>
                             <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{taxInfo.accountGuidance}</p>
                           </div>
                           {taxInfo.assumptions.length > 0 && (
                             <div className="rounded-lg p-2 bg-violet-50 dark:bg-violet-500/5 border border-violet-200 dark:border-violet-500/10">
-                              <div className="text-xs text-violet-700 dark:text-violet-400 font-medium mb-0.5">Assumptions & Caveats</div>
+                              <div className="text-xs text-violet-700 dark:text-violet-400 font-medium mb-0.5">{t('portfolio.tax.assumptionsCaveats')}</div>
                               <ul className="space-y-0.5">
                                 {taxInfo.assumptions.map((a, i) => (
                                   <li key={i} className="text-xs text-violet-600 dark:text-violet-300 flex gap-1">
@@ -667,10 +719,10 @@ export function PortfolioAlignment() {
                 <div className="rounded-xl border p-4 border-violet-500/20" style={{ backgroundColor: 'var(--dash-bg-card)' }}>
                   <div className="flex items-center gap-2 mb-1">
                     <FileText className="w-4 h-4 text-violet-500" />
-                    <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Tax Context Questionnaire</h4>
+                    <h4 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('portfolio.tax.title')}</h4>
                   </div>
                   <p className="text-xs text-[var(--dash-text-4)] mb-4">
-                    Answer a few questions so we can layer in educational tax considerations for each recommendation. This is not tax advice — confirm details with a tax professional.
+                    {t('portfolio.tax.subtitle')}
                   </p>
 
                   {!showTaxQ ? (
@@ -681,40 +733,40 @@ export function PortfolioAlignment() {
                       className="text-xs border-violet-500/30 text-violet-600 dark:text-violet-400"
                     >
                       <Scale className="w-3 h-3 mr-1" />
-                      Add Tax Context
+                      {t('portfolio.tax.addTaxContext')}
                     </Button>
                   ) : (
                     <div className="space-y-4">
-                      <TaxQuestion label="What type of account is this portfolio in?">
+                      <TaxQuestion label={t('portfolio.tax.questions.accountType')}>
                         <TaxSelect
                           value={taxContext.accountType}
                           onChange={v => setTaxContext(p => ({ ...p, accountType: v as AccountType }))}
                           options={[
-                            { value: '', label: 'Select...' },
-                            { value: 'taxable', label: 'Taxable brokerage' },
-                            { value: 'traditional-ira', label: 'Traditional IRA' },
-                            { value: 'roth-ira', label: 'Roth IRA' },
-                            { value: '401k', label: '401(k) / 403(b)' },
-                            { value: 'hsa', label: 'HSA' },
-                            { value: 'multiple', label: 'Multiple / mixed accounts' },
+                            { value: '', label: t('portfolio.tax.options.select') },
+                            { value: 'taxable', label: t('portfolio.tax.options.taxable') },
+                            { value: 'traditional-ira', label: t('portfolio.tax.options.traditionalIra') },
+                            { value: 'roth-ira', label: t('portfolio.tax.options.rothIra') },
+                            { value: '401k', label: t('portfolio.tax.options.retirement401k') },
+                            { value: 'hsa', label: t('portfolio.tax.options.hsa') },
+                            { value: 'multiple', label: t('portfolio.tax.options.multiple') },
                           ]}
                         />
                       </TaxQuestion>
-                      <TaxQuestion label="What is your estimated federal tax bracket?">
+                      <TaxQuestion label={t('portfolio.tax.questions.taxBracket')}>
                         <TaxSelect
                           value={taxContext.taxBracket}
                           onChange={v => setTaxContext(p => ({ ...p, taxBracket: v as TaxBracket }))}
                           options={[
-                            { value: '', label: 'Select...' },
-                            { value: '10-12', label: '10–12%' },
-                            { value: '22-24', label: '22–24%' },
-                            { value: '32-35', label: '32–35%' },
-                            { value: '37', label: '37%' },
-                            { value: 'unsure', label: 'Not sure' },
+                            { value: '', label: t('portfolio.tax.options.select') },
+                            { value: '10-12', label: t('portfolio.tax.options.bracket1012') },
+                            { value: '22-24', label: t('portfolio.tax.options.bracket2224') },
+                            { value: '32-35', label: t('portfolio.tax.options.bracket3235') },
+                            { value: '37', label: t('portfolio.tax.options.bracket37') },
+                            { value: 'unsure', label: t('portfolio.tax.options.unsure') },
                           ]}
                         />
                       </TaxQuestion>
-                      <TaxQuestion label="What state do you live in?">
+                      <TaxQuestion label={t('portfolio.tax.questions.state')}>
                         <input
                           type="text"
                           value={taxContext.state}
@@ -725,45 +777,45 @@ export function PortfolioAlignment() {
                           style={{ borderColor: 'var(--dash-border)' }}
                         />
                       </TaxQuestion>
-                      <TaxQuestion label="Are any holdings currently at a gain or loss?">
+                      <TaxQuestion label={t('portfolio.tax.questions.gainStatus')}>
                         <TaxSelect
                           value={taxContext.gainStatus}
                           onChange={v => setTaxContext(p => ({ ...p, gainStatus: v as GainStatus }))}
                           options={[
-                            { value: '', label: 'Select...' },
-                            { value: 'mostly-gains', label: 'Mostly gains' },
-                            { value: 'mostly-losses', label: 'Mostly losses' },
-                            { value: 'mixed', label: 'Mixed gains and losses' },
-                            { value: 'unsure', label: 'Not sure' },
+                            { value: '', label: t('portfolio.tax.options.select') },
+                            { value: 'mostly-gains', label: t('portfolio.tax.options.mostlyGains') },
+                            { value: 'mostly-losses', label: t('portfolio.tax.options.mostlyLosses') },
+                            { value: 'mixed', label: t('portfolio.tax.options.mixed') },
+                            { value: 'unsure', label: t('portfolio.tax.options.unsure') },
                           ]}
                         />
                       </TaxQuestion>
-                      <TaxQuestion label="Are the gains short-term or long-term?">
+                      <TaxQuestion label={t('portfolio.tax.questions.gainTerm')}>
                         <TaxSelect
                           value={taxContext.gainTerm}
                           onChange={v => setTaxContext(p => ({ ...p, gainTerm: v as GainTerm }))}
                           options={[
-                            { value: '', label: 'Select...' },
-                            { value: 'short-term', label: 'Mostly short-term (<1 year)' },
-                            { value: 'long-term', label: 'Mostly long-term (>1 year)' },
-                            { value: 'both', label: 'Both' },
-                            { value: 'unsure', label: 'Not sure' },
+                            { value: '', label: t('portfolio.tax.options.select') },
+                            { value: 'short-term', label: t('portfolio.tax.options.shortTerm') },
+                            { value: 'long-term', label: t('portfolio.tax.options.longTerm') },
+                            { value: 'both', label: t('portfolio.tax.options.both') },
+                            { value: 'unsure', label: t('portfolio.tax.options.unsure') },
                           ]}
                         />
                       </TaxQuestion>
-                      <TaxQuestion label="Are you planning to withdraw money from this portfolio in the next 12–24 months?">
+                      <TaxQuestion label={t('portfolio.tax.questions.withdrawal')}>
                         <TaxYesNo
                           value={taxContext.withdrawalPlanned}
                           onChange={v => setTaxContext(p => ({ ...p, withdrawalPlanned: v }))}
                         />
                       </TaxQuestion>
-                      <TaxQuestion label="Are there any tax-loss harvesting opportunities or carryforward losses?">
+                      <TaxQuestion label={t('portfolio.tax.questions.lossHarvesting')}>
                         <TaxYesNo
                           value={taxContext.hasLossHarvesting}
                           onChange={v => setTaxContext(p => ({ ...p, hasLossHarvesting: v }))}
                         />
                       </TaxQuestion>
-                      <TaxQuestion label="Are there any restricted holdings, employer stock, or concentrated positions?">
+                      <TaxQuestion label={t('portfolio.tax.questions.restrictions')}>
                         <TaxYesNo
                           value={taxContext.hasRestrictions}
                           onChange={v => setTaxContext(p => ({ ...p, hasRestrictions: v }))}
@@ -777,7 +829,7 @@ export function PortfolioAlignment() {
                           className="text-xs bg-violet-600 hover:bg-violet-700 text-white"
                         >
                           <Scale className="w-3 h-3 mr-1" />
-                          Apply Tax Context
+                          {t('portfolio.tax.applyTaxContext')}
                         </Button>
                         <Button
                           variant="ghost"
@@ -785,7 +837,7 @@ export function PortfolioAlignment() {
                           onClick={() => { setShowTaxQ(false); }}
                           className="text-xs text-[var(--dash-text-4)]"
                         >
-                          Skip
+                          {t('portfolio.tax.skip')}
                         </Button>
                       </div>
                     </div>
@@ -798,8 +850,8 @@ export function PortfolioAlignment() {
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-violet-500" />
                     <span className="text-xs text-[var(--dash-text-2)]">
-                      Tax context applied — {taxContext.accountType ? taxContext.accountType.replace('-', ' ').replace('ira', 'IRA') : 'account type unspecified'}
-                      {taxContext.taxBracket && taxContext.taxBracket !== 'unsure' ? `, ${taxContext.taxBracket}% bracket` : ''}
+                      {t('portfolio.tax.applied')} — {taxContext.accountType ? taxContext.accountType.replace('-', ' ').replace('ira', 'IRA') : 'account type unspecified'}
+                      {taxContext.taxBracket && taxContext.taxBracket !== 'unsure' ? `, ${taxContext.taxBracket}%` : ''}
                       {taxContext.state ? `, ${taxContext.state}` : ''}
                     </span>
                   </div>
@@ -809,7 +861,7 @@ export function PortfolioAlignment() {
                     onClick={() => { setTaxCompleted(false); setShowTaxQ(true); }}
                     className="text-xs text-violet-600 dark:text-violet-400"
                   >
-                    Edit
+                    {t('portfolio.tax.edit')}
                   </Button>
                 </div>
               )}
@@ -821,7 +873,7 @@ export function PortfolioAlignment() {
       {/* Empty State */}
       {!analyzed && holdings.length === 0 && (
         <div className="text-center py-8 text-sm text-[var(--dash-text-4)]">
-          Add your portfolio tickers above to see how your holdings align with the report's market insights, sector trends, and risk signals.
+          {t('portfolio.emptyState')}
         </div>
       )}
     </div>
@@ -857,19 +909,20 @@ function TaxSelect({ value, onChange, options }: {
 }
 
 function TaxYesNo({ value, onChange }: { value: boolean | null; onChange: (v: boolean) => void }) {
+  const t = useT();
   return (
     <div className="flex gap-2">
       <button
         onClick={() => onChange(true)}
         className={`px-3 py-1 rounded-lg border text-xs transition-colors ${value === true ? 'bg-violet-500/10 border-violet-500/30 text-violet-600 dark:text-violet-400 font-medium' : 'border-[var(--dash-border)] text-[var(--dash-text-4)] hover:text-[var(--dash-text-2)]'}`}
       >
-        Yes
+        {t('portfolio.tax.yesNo.yes')}
       </button>
       <button
         onClick={() => onChange(false)}
         className={`px-3 py-1 rounded-lg border text-xs transition-colors ${value === false ? 'bg-violet-500/10 border-violet-500/30 text-violet-600 dark:text-violet-400 font-medium' : 'border-[var(--dash-border)] text-[var(--dash-text-4)] hover:text-[var(--dash-text-2)]'}`}
       >
-        No
+        {t('portfolio.tax.yesNo.no')}
       </button>
     </div>
   );

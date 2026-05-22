@@ -17,6 +17,8 @@ import {
   Download, BarChart3, Activity, Zap, ArrowUpRight, ArrowDownRight,
   Bitcoin, Building2, Briefcase, Globe, FileText, RefreshCw, Search,
 } from 'lucide-react';
+import { InsightBlock } from './insight-block';
+import { useT } from '@/lib/i18n';
 
 // ── Severity styling ──
 
@@ -44,11 +46,11 @@ const sevStyles: Record<AlertSeverity, { border: string; bg: string; text: strin
   },
 };
 
-const statusStyles: Record<AlertStatus, { label: string; color: string }> = {
-  active: { label: 'Active', color: 'text-blue-500' },
-  reviewed: { label: 'Reviewed', color: 'text-green-600 dark:text-green-400' },
-  snoozed: { label: 'Snoozed', color: 'text-amber-500' },
-  dismissed: { label: 'Dismissed', color: 'text-[var(--dash-text-4)]' },
+const statusStylesBase: Record<AlertStatus, { labelKey: string; color: string }> = {
+  active: { labelKey: 'watchlist.statusLabels.active', color: 'text-blue-500' },
+  reviewed: { labelKey: 'watchlist.statusLabels.reviewed', color: 'text-green-600 dark:text-green-400' },
+  snoozed: { labelKey: 'watchlist.statusLabels.snoozed', color: 'text-amber-500' },
+  dismissed: { labelKey: 'watchlist.statusLabels.dismissed', color: 'text-[var(--dash-text-4)]' },
 };
 
 const exposureIcons: Partial<Record<ExposureType, typeof Bitcoin>> = {
@@ -60,14 +62,14 @@ const exposureIcons: Partial<Record<ExposureType, typeof Bitcoin>> = {
   fund: Globe,
 };
 
-function timeAgo(ts: string): string {
+function timeAgo(ts: string, t: (k: string, v?: Record<string, string | number>) => string): string {
   const ms = Date.now() - new Date(ts).getTime();
   const h = Math.floor(ms / 3600000);
-  if (h < 1) return `${Math.floor(ms / 60000)}m ago`;
-  if (h < 24) return `${h}h ago`;
+  if (h < 1) return t('time.minsAgo', { n: Math.floor(ms / 60000) });
+  if (h < 24) return t('time.hoursAgo', { n: h });
   const d = Math.floor(h / 24);
-  if (d === 1) return '1 day ago';
-  return `${d} days ago`;
+  if (d === 1) return t('time.oneDayAgo');
+  return t('time.daysAgo', { n: d });
 }
 
 function fmtDate(ts: string): string {
@@ -77,6 +79,7 @@ function fmtDate(ts: string): string {
 // ── Main Component ──
 
 export function WatchlistAlerts() {
+  const t = useT();
   const { filters, setFilter, resetFilters, drawerAlertId, openDrawer, closeDrawer, setAlertStatus, activeTab, setActiveTab } = useWatchlistStore();
   const alerts = useFilteredAlerts();
   const entries = useFilteredEntries();
@@ -104,74 +107,92 @@ export function WatchlistAlerts() {
             <Eye className="w-5 h-5 text-red-500 dark:text-red-400" />
           </div>
           <div>
-            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">Watchlist Alerts</h3>
-            <p className="text-xs text-[var(--dash-text-4)]">Portfolio & exposure movements — Trump family & Kushner</p>
+            <h3 className="text-sm md:text-base font-semibold text-[var(--dash-text-1)]">{t('watchlist.title')}</h3>
+            <p className="text-xs text-[var(--dash-text-4)]">{t('watchlist.subtitle')}</p>
           </div>
         </div>
         <div className="flex items-center gap-2 text-xs text-[var(--dash-text-4)]">
           <Clock className="w-3 h-3" />
-          <span>Updated {timeAgo(kpis.lastUpdated)}</span>
+          <span>{t('watchlist.updated', { time: timeAgo(kpis.lastUpdated, t) })}</span>
           {(Date.now() - new Date(kpis.lastUpdated).getTime()) > 86400000 && (
-            <Badge variant="outline" className="text-xs text-amber-500 border-amber-500/30 ml-1">Stale</Badge>
+            <Badge variant="outline" className="text-xs text-amber-500 border-amber-500/30 ml-1">{t('watchlist.stale')}</Badge>
           )}
         </div>
       </div>
 
       {/* KPI Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <KPICard label="Active Alerts" value={kpis.activeAlerts} icon={Bell} highlight={kpis.activeAlerts > 0} />
-        <KPICard label="High Priority" value={kpis.highPriorityCount} icon={AlertTriangle} highlight={kpis.highPriorityCount > 0} highlightColor="red" />
-        <KPICard label="Exposure Tracked" value={fmtCompact(kpis.totalExposureTracked)} icon={BarChart3} />
-        <KPICard label="Crypto Exposure" value={fmtCompact(kpis.cryptoExposure)} icon={Bitcoin} highlight={kpis.cryptoExposure > 50000000} highlightColor="amber" />
+        <KPICard label={t('watchlist.kpis.activeAlerts')} value={kpis.activeAlerts} icon={Bell} highlight={kpis.activeAlerts > 0} />
+        <KPICard label={t('watchlist.kpis.highPriority')} value={kpis.highPriorityCount} icon={AlertTriangle} highlight={kpis.highPriorityCount > 0} highlightColor="red" />
+        <KPICard label={t('watchlist.kpis.exposureTracked')} value={fmtCompact(kpis.totalExposureTracked)} icon={BarChart3} />
+        <KPICard label={t('watchlist.kpis.cryptoExposure')} value={fmtCompact(kpis.cryptoExposure)} icon={Bitcoin} highlight={kpis.cryptoExposure > 50000000} highlightColor="amber" />
       </div>
+
+      <InsightBlock
+        accent="red"
+        what={t('watchlist.insightWhat', {
+          entities: kpis.entitiesWatched,
+          totalExposure: fmtCompact(kpis.totalExposureTracked),
+          activeAlerts: kpis.activeAlerts,
+          s: kpis.activeAlerts !== 1 ? 's' : '',
+          highPriority: kpis.highPriorityCount,
+          cryptoExposure: fmtCompact(kpis.cryptoExposure),
+        })}
+        why={kpis.highPriorityCount > 0 ? t('watchlist.insightWhyHigh') : t('watchlist.insightWhyLow')}
+        rec={kpis.highPriorityCount > 2
+          ? t('watchlist.insightRecMultiple')
+          : kpis.activeAlerts > 0
+          ? t('watchlist.insightRecSome')
+          : t('watchlist.insightRecNone')}
+      />
 
       {/* Filters */}
       <div className="rounded-xl border p-3 transition-colors" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
         <div className="flex flex-wrap items-center gap-2">
           <Filter className="w-3.5 h-3.5 text-[var(--dash-text-4)]" />
           <FilterSelect
-            label="Person"
+            label={t('watchlist.filters.person')}
             value={filters.person}
             onChange={v => setFilter('person', v)}
             options={[
-              { value: 'all', label: 'All People' },
+              { value: 'all', label: t('watchlist.filters.allPeople') },
               ...watchedEntities.map(e => ({ value: e.id, label: e.name })),
             ]}
           />
           <FilterSelect
-            label="Asset Type"
+            label={t('watchlist.filters.assetType')}
             value={filters.assetType}
             onChange={v => setFilter('assetType', v as any)}
             options={[
-              { value: 'all', label: 'All Types' },
+              { value: 'all', label: t('watchlist.filters.allTypes') },
               ...Object.entries(EXPOSURE_TYPE_LABELS).map(([k, v]) => ({ value: k, label: v })),
             ]}
           />
           <FilterSelect
-            label="Severity"
+            label={t('watchlist.filters.severity')}
             value={filters.severity}
             onChange={v => setFilter('severity', v as any)}
             options={[
-              { value: 'all', label: 'All Severities' },
-              { value: 'high', label: 'High' },
-              { value: 'medium', label: 'Medium' },
-              { value: 'low', label: 'Low' },
+              { value: 'all', label: t('watchlist.filters.allSeverities') },
+              { value: 'high', label: t('watchlist.filters.high') },
+              { value: 'medium', label: t('watchlist.filters.medium') },
+              { value: 'low', label: t('watchlist.filters.low') },
             ]}
           />
           <FilterSelect
-            label="Date Range"
+            label={t('watchlist.filters.dateRange')}
             value={filters.dateRange}
             onChange={v => setFilter('dateRange', v as any)}
             options={[
-              { value: 'all', label: 'All Time' },
-              { value: '24h', label: 'Last 24h' },
-              { value: '7d', label: 'Last 7 days' },
-              { value: '30d', label: 'Last 30 days' },
-              { value: '90d', label: 'Last 90 days' },
+              { value: 'all', label: t('watchlist.filters.allTime') },
+              { value: '24h', label: t('watchlist.filters.last24h') },
+              { value: '7d', label: t('watchlist.filters.last7d') },
+              { value: '30d', label: t('watchlist.filters.last30d') },
+              { value: '90d', label: t('watchlist.filters.last90d') },
             ]}
           />
           {(filters.person !== 'all' || filters.assetType !== 'all' || filters.severity !== 'all' || filters.dateRange !== 'all') && (
-            <button onClick={resetFilters} className="text-xs text-indigo-500 hover:underline ml-1">Reset</button>
+            <button onClick={resetFilters} className="text-xs text-indigo-500 hover:underline ml-1">{t('watchlist.filters.reset')}</button>
           )}
         </div>
       </div>
@@ -188,9 +209,9 @@ export function WatchlistAlerts() {
                 : 'border-transparent text-[var(--dash-text-4)] hover:text-[var(--dash-text-2)]'
             }`}
           >
-            {tab === 'alerts' && <span className="flex items-center gap-1.5"><Bell className="w-3.5 h-3.5" />Alerts{activeAlerts.length > 0 && <span className="text-xs bg-red-500/10 text-red-500 px-1.5 rounded-full">{activeAlerts.length}</span>}</span>}
-            {tab === 'watchlist' && <span className="flex items-center gap-1.5"><Search className="w-3.5 h-3.5" />Watchlist</span>}
-            {tab === 'timeline' && <span className="flex items-center gap-1.5"><Activity className="w-3.5 h-3.5" />Timeline</span>}
+            {tab === 'alerts' && <span className="flex items-center gap-1.5"><Bell className="w-3.5 h-3.5" />{t('watchlist.tabs.alerts')}{activeAlerts.length > 0 && <span className="text-xs bg-red-500/10 text-red-500 px-1.5 rounded-full">{activeAlerts.length}</span>}</span>}
+            {tab === 'watchlist' && <span className="flex items-center gap-1.5"><Search className="w-3.5 h-3.5" />{t('watchlist.tabs.watchlist')}</span>}
+            {tab === 'timeline' && <span className="flex items-center gap-1.5"><Activity className="w-3.5 h-3.5" />{t('watchlist.tabs.timeline')}</span>}
           </button>
         ))}
       </div>
@@ -224,7 +245,7 @@ export function WatchlistAlerts() {
       {/* Empty state */}
       {alerts.length === 0 && entries.length === 0 && (
         <div className="text-center py-10 text-sm text-[var(--dash-text-4)]">
-          No movements match the current filters.
+          {t('watchlist.empty')}
         </div>
       )}
     </div>
@@ -280,6 +301,7 @@ function AlertsPanel({ alerts, onOpen, onStatusChange }: {
   onOpen: (id: string) => void;
   onStatusChange: (id: string, status: AlertStatus) => void;
 }) {
+  const t = useT();
   const active = alerts.filter(a => a.status === 'active');
   const reviewed = alerts.filter(a => a.status === 'reviewed');
   const dismissed = alerts.filter(a => a.status === 'dismissed' || a.status === 'snoozed');
@@ -289,8 +311,8 @@ function AlertsPanel({ alerts, onOpen, onStatusChange }: {
       {active.length === 0 && (
         <div className="rounded-xl border border-green-500/20 p-6 text-center" style={{ backgroundColor: 'var(--dash-bg-card)' }}>
           <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
-          <div className="text-sm font-medium text-[var(--dash-text-1)]">All clear</div>
-          <div className="text-xs text-[var(--dash-text-4)]">No active alerts match the current filters.</div>
+          <div className="text-sm font-medium text-[var(--dash-text-1)]">{t('watchlist.alerts.allClear')}</div>
+          <div className="text-xs text-[var(--dash-text-4)]">{t('watchlist.alerts.noActive')}</div>
         </div>
       )}
 
@@ -304,7 +326,7 @@ function AlertsPanel({ alerts, onOpen, onStatusChange }: {
 
       {reviewed.length > 0 && (
         <div>
-          <div className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide mb-2">Reviewed ({reviewed.length})</div>
+          <div className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide mb-2">{t('watchlist.alerts.reviewedGroup', { n: reviewed.length })}</div>
           <div className="space-y-1.5">
             {reviewed.slice(0, 5).map(a => (
               <AlertCardCompact key={a.id} alert={a} onOpen={onOpen} />
@@ -315,7 +337,7 @@ function AlertsPanel({ alerts, onOpen, onStatusChange }: {
 
       {dismissed.length > 0 && (
         <div>
-          <div className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide mb-2">Dismissed ({dismissed.length})</div>
+          <div className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide mb-2">{t('watchlist.alerts.dismissedGroup', { n: dismissed.length })}</div>
           <div className="space-y-1.5">
             {dismissed.slice(0, 3).map(a => (
               <AlertCardCompact key={a.id} alert={a} onOpen={onOpen} />
@@ -334,6 +356,7 @@ function AlertCard({ alert, onOpen, onStatusChange }: {
   onOpen: (id: string) => void;
   onStatusChange: (id: string, status: AlertStatus) => void;
 }) {
+  const t = useT();
   const entity = watchedEntities.find(e => e.id === alert.entityId);
   const sev = sevStyles[alert.severity];
 
@@ -355,13 +378,13 @@ function AlertCard({ alert, onOpen, onStatusChange }: {
         <div className="flex-1 min-w-0">
           {/* Top row: severity + type + entity */}
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <Badge variant="outline" className={`text-xs capitalize ${sev.badge}`}>
-              {alert.severity}
+            <Badge variant="outline" className={`text-xs ${sev.badge}`}>
+              {t(`watchlist.filters.${alert.severity}`)}
             </Badge>
             <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">
               {ALERT_TYPE_LABELS[alert.alertType]}
             </Badge>
-            <span className="text-xs text-[var(--dash-text-4)]">{timeAgo(alert.timestamp)}</span>
+            <span className="text-xs text-[var(--dash-text-4)]">{timeAgo(alert.timestamp, t)}</span>
           </div>
 
           {/* Asset + Entity */}
@@ -379,23 +402,23 @@ function AlertCard({ alert, onOpen, onStatusChange }: {
             <button
               onClick={() => onStatusChange(alert.id, 'reviewed')}
               className="text-xs text-[var(--dash-text-4)] hover:text-green-500 flex items-center gap-0.5"
-              title="Mark as reviewed"
+              title={t('watchlist.alerts.markReviewed')}
             >
-              <CheckCircle2 className="w-3 h-3" /> Review
+              <CheckCircle2 className="w-3 h-3" /> {t('watchlist.alerts.review')}
             </button>
             <button
               onClick={() => onStatusChange(alert.id, 'snoozed')}
               className="text-xs text-[var(--dash-text-4)] hover:text-amber-500 flex items-center gap-0.5"
-              title="Snooze"
+              title={t('watchlist.alerts.snooze')}
             >
-              <BellOff className="w-3 h-3" /> Snooze
+              <BellOff className="w-3 h-3" /> {t('watchlist.alerts.snooze')}
             </button>
             <button
               onClick={() => onStatusChange(alert.id, 'dismissed')}
               className="text-xs text-[var(--dash-text-4)] hover:text-red-500 flex items-center gap-0.5"
-              title="Dismiss"
+              title={t('watchlist.alerts.dismiss')}
             >
-              <X className="w-3 h-3" /> Dismiss
+              <X className="w-3 h-3" /> {t('watchlist.alerts.dismiss')}
             </button>
           </div>
         </div>
@@ -412,9 +435,10 @@ function AlertCardCompact({ alert, onOpen }: {
   alert: WatchlistAlert;
   onOpen: (id: string) => void;
 }) {
+  const t = useT();
   const entity = watchedEntities.find(e => e.id === alert.entityId);
   const sev = sevStyles[alert.severity];
-  const st = statusStyles[alert.status];
+  const st = statusStylesBase[alert.status];
 
   return (
     <div
@@ -426,8 +450,8 @@ function AlertCardCompact({ alert, onOpen }: {
       <div className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
       <span className="text-xs font-medium text-[var(--dash-text-1)] truncate flex-1">{alert.asset}</span>
       <span className="text-xs text-[var(--dash-text-4)]">{entity?.avatar}</span>
-      <span className={`text-xs ${st.color}`}>{st.label}</span>
-      <span className="text-xs text-[var(--dash-text-4)]">{timeAgo(alert.timestamp)}</span>
+      <span className={`text-xs ${st.color}`}>{t(st.labelKey)}</span>
+      <span className="text-xs text-[var(--dash-text-4)]">{timeAgo(alert.timestamp, t)}</span>
     </div>
   );
 }
@@ -439,24 +463,25 @@ function WatchlistTable({ entries, alerts, onAlertOpen }: {
   alerts: WatchlistAlert[];
   onAlertOpen: (id: string) => void;
 }) {
+  const t = useT();
   return (
     <div className="space-y-2">
       {/* Desktop header */}
       <div className="hidden lg:grid grid-cols-[1fr_1.2fr_0.7fr_0.7fr_0.7fr_0.5fr_0.6fr_0.5fr_0.4fr] gap-2 px-3 text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide">
-        <div>Entity</div>
-        <div>Asset / Holding</div>
-        <div>Type</div>
-        <div className="text-right">Previous</div>
-        <div className="text-right">Latest</div>
-        <div className="text-right">Change</div>
-        <div>Source</div>
-        <div>Confidence</div>
-        <div>Status</div>
+        <div>{t('watchlist.table.entity')}</div>
+        <div>{t('watchlist.table.asset')}</div>
+        <div>{t('watchlist.table.type')}</div>
+        <div className="text-right">{t('watchlist.table.previous')}</div>
+        <div className="text-right">{t('watchlist.table.latest')}</div>
+        <div className="text-right">{t('watchlist.table.change')}</div>
+        <div>{t('watchlist.table.source')}</div>
+        <div>{t('watchlist.table.confidence')}</div>
+        <div>{t('watchlist.table.status')}</div>
       </div>
 
       {entries.length === 0 && (
         <div className="rounded-xl border p-8 text-center text-sm text-[var(--dash-text-4)]" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
-          No watchlist entries match the current filters.
+          {t('watchlist.table.noEntries')}
         </div>
       )}
 
@@ -520,7 +545,7 @@ function WatchlistTable({ entries, alerts, onAlertOpen }: {
                 <span className={`tabular-nums font-medium ${isUp ? 'text-green-600 dark:text-green-400' : e.pctChange < 0 ? 'text-red-500' : 'text-[var(--dash-text-4)]'}`}>
                   {isUp ? '+' : ''}{e.pctChange.toFixed(1)}%
                 </span>
-                <span className="text-[var(--dash-text-4)] ml-auto">{timeAgo(e.timestamp)}</span>
+                <span className="text-[var(--dash-text-4)] ml-auto">{timeAgo(e.timestamp, t)}</span>
               </div>
             </div>
           </div>
@@ -536,10 +561,11 @@ function TimelineView({ timeline, onOpen }: {
   timeline: ReturnType<typeof useTimeline>;
   onOpen: (entryId: string) => void;
 }) {
+  const tl = useT();
   if (timeline.length === 0) {
     return (
       <div className="rounded-xl border p-8 text-center text-sm text-[var(--dash-text-4)]" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
-        No movements match the current filters.
+        {tl('watchlist.timeline.noMovements')}
       </div>
     );
   }
@@ -548,35 +574,35 @@ function TimelineView({ timeline, onOpen }: {
     <div className="relative pl-6">
       <div className="absolute left-2.5 top-0 bottom-0 w-px bg-[var(--dash-border)]" />
       <div className="space-y-3">
-        {timeline.map(t => {
-          const isUp = t.pctChange > 0;
-          const sevDot = t.alertSeverity === 'high' ? 'bg-red-500' : t.alertSeverity === 'medium' ? 'bg-amber-500' : 'bg-[var(--dash-border)]';
+        {timeline.map(item => {
+          const isUp = item.pctChange > 0;
+          const sevDot = item.alertSeverity === 'high' ? 'bg-red-500' : item.alertSeverity === 'medium' ? 'bg-amber-500' : 'bg-[var(--dash-border)]';
           return (
             <div
-              key={t.id}
+              key={item.id}
               className="relative cursor-pointer group"
-              onClick={() => onOpen(t.id)}
+              onClick={() => onOpen(item.id)}
             >
               <div className={`absolute -left-3.5 top-3 w-3 h-3 rounded-full border-2 border-[var(--dash-bg-card)] ${sevDot}`} style={{ borderColor: 'var(--dash-bg-card-solid, var(--dash-bg-card))' }} />
               <div className="rounded-lg border p-3 transition-all group-hover:shadow-sm" style={{ backgroundColor: 'var(--dash-bg-card)', borderColor: 'var(--dash-border)' }}>
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-[var(--dash-text-2)]">{t.entityAvatar}</span>
-                    <span className="text-xs text-[var(--dash-text-4)]">{t.entityName}</span>
+                    <span className="text-xs font-bold text-[var(--dash-text-2)]">{item.entityAvatar}</span>
+                    <span className="text-xs text-[var(--dash-text-4)]">{item.entityName}</span>
                   </div>
-                  <span className="text-xs text-[var(--dash-text-4)]">{timeAgo(t.timestamp)}</span>
+                  <span className="text-xs text-[var(--dash-text-4)]">{timeAgo(item.timestamp, tl)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-[var(--dash-text-1)] truncate">{t.asset}</span>
+                  <span className="text-sm font-medium text-[var(--dash-text-1)] truncate">{item.asset}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-[var(--dash-text-3)] tabular-nums">{fmtCompact(t.latestValue)}</span>
-                    <span className={`text-xs tabular-nums font-medium ${isUp ? 'text-green-600 dark:text-green-400' : t.pctChange < 0 ? 'text-red-500' : 'text-[var(--dash-text-4)]'}`}>
-                      {isUp ? '+' : ''}{t.pctChange.toFixed(1)}%
+                    <span className="text-xs text-[var(--dash-text-3)] tabular-nums">{fmtCompact(item.latestValue)}</span>
+                    <span className={`text-xs tabular-nums font-medium ${isUp ? 'text-green-600 dark:text-green-400' : item.pctChange < 0 ? 'text-red-500' : 'text-[var(--dash-text-4)]'}`}>
+                      {isUp ? '+' : ''}{item.pctChange.toFixed(1)}%
                     </span>
-                    {t.alertScore != null && (
+                    {item.alertScore != null && (
                       <span className={`text-xs tabular-nums font-bold ${
-                        t.alertSeverity === 'high' ? 'text-red-500' : t.alertSeverity === 'medium' ? 'text-amber-500' : 'text-[var(--dash-text-4)]'
-                      }`}>{t.alertScore}</span>
+                        item.alertSeverity === 'high' ? 'text-red-500' : item.alertSeverity === 'medium' ? 'text-amber-500' : 'text-[var(--dash-text-4)]'
+                      }`}>{item.alertScore}</span>
                     )}
                   </div>
                 </div>
@@ -597,6 +623,7 @@ function DetailDrawer({ alert, entry, onClose, onStatusChange }: {
   onClose: () => void;
   onStatusChange: (id: string, status: AlertStatus) => void;
 }) {
+  const t = useT();
   const entity = watchedEntities.find(e => e.id === alert.entityId);
   const sev = sevStyles[alert.severity];
   const { score, factors } = computeAlertScore(entry);
@@ -616,7 +643,7 @@ function DetailDrawer({ alert, entry, onClose, onStatusChange }: {
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Badge variant="outline" className={`text-xs capitalize ${sev.badge}`}>{alert.severity}</Badge>
+                <Badge variant="outline" className={`text-xs ${sev.badge}`}>{t(`watchlist.filters.${alert.severity}`)}</Badge>
                 <Badge variant="outline" className="text-xs border-[var(--dash-border)] text-[var(--dash-text-4)]">{ALERT_TYPE_LABELS[alert.alertType]}</Badge>
               </div>
               <h4 className="text-base font-bold text-[var(--dash-text-1)]">{entry.asset}</h4>
@@ -630,41 +657,41 @@ function DetailDrawer({ alert, entry, onClose, onStatusChange }: {
           {/* Score breakdown */}
           <div className="rounded-lg border p-3" style={{ borderColor: 'var(--dash-border)' }}>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide">Alert Score</span>
+              <span className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide">{t('watchlist.drawer.alertScore')}</span>
               <span className={`text-2xl font-bold tabular-nums ${sev.text}`}>{score}</span>
             </div>
             <div className="space-y-1.5">
-              <ScoreBar label="Magnitude" value={factors.magnitudeScore} />
-              <ScoreBar label="Speed" value={factors.speedScore} />
-              <ScoreBar label="Novelty" value={factors.noveltyScore} />
-              <ScoreBar label="Source Quality" value={factors.sourceScore} />
-              <ScoreBar label="Sector Volatility" value={factors.sectorVolatilityScore} />
-              <ScoreBar label="Freshness" value={factors.freshnessScore} />
+              <ScoreBar label={t('watchlist.drawer.magnitude')} value={factors.magnitudeScore} />
+              <ScoreBar label={t('watchlist.drawer.speed')} value={factors.speedScore} />
+              <ScoreBar label={t('watchlist.drawer.novelty')} value={factors.noveltyScore} />
+              <ScoreBar label={t('watchlist.drawer.sourceQuality')} value={factors.sourceScore} />
+              <ScoreBar label={t('watchlist.drawer.sectorVolatility')} value={factors.sectorVolatilityScore} />
+              <ScoreBar label={t('watchlist.drawer.freshness')} value={factors.freshnessScore} />
             </div>
           </div>
 
           {/* Why it matters */}
           <div className="rounded-lg border p-3" style={{ borderColor: 'var(--dash-border)' }}>
-            <div className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide mb-1.5">Why This Matters</div>
+            <div className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide mb-1.5">{t('watchlist.drawer.whyThisMatters')}</div>
             <p className="text-sm text-[var(--dash-text-2)] leading-relaxed">{alert.whyItMatters}</p>
           </div>
 
           {/* Position details */}
           <div className="rounded-lg border p-3" style={{ borderColor: 'var(--dash-border)' }}>
-            <div className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide mb-2">Position Details</div>
+            <div className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide mb-2">{t('watchlist.drawer.positionDetails')}</div>
             <div className="grid grid-cols-2 gap-3">
-              <DetailItem label="Previous Value" value={entry.previousValue > 0 ? fmtCompact(entry.previousValue) : 'N/A (new)'} />
-              <DetailItem label="Latest Value" value={fmtCompact(entry.latestValue)} />
-              <DetailItem label="Change" value={`${entry.pctChange > 0 ? '+' : ''}${entry.pctChange.toFixed(1)}%`} valueColor={entry.pctChange > 0 ? 'text-green-600 dark:text-green-400' : entry.pctChange < 0 ? 'text-red-500' : undefined} />
-              <DetailItem label="Exposure Type" value={EXPOSURE_TYPE_LABELS[entry.exposureType]} />
-              <DetailItem label="Confidence" value={entry.confidence} />
-              <DetailItem label="Last Updated" value={fmtDate(entry.timestamp)} />
+              <DetailItem label={t('watchlist.drawer.previousValue')} value={entry.previousValue > 0 ? fmtCompact(entry.previousValue) : t('watchlist.drawer.newPosition')} />
+              <DetailItem label={t('watchlist.drawer.latestValue')} value={fmtCompact(entry.latestValue)} />
+              <DetailItem label={t('watchlist.drawer.change')} value={`${entry.pctChange > 0 ? '+' : ''}${entry.pctChange.toFixed(1)}%`} valueColor={entry.pctChange > 0 ? 'text-green-600 dark:text-green-400' : entry.pctChange < 0 ? 'text-red-500' : undefined} />
+              <DetailItem label={t('watchlist.drawer.exposureType')} value={EXPOSURE_TYPE_LABELS[entry.exposureType]} />
+              <DetailItem label={t('watchlist.drawer.confidence')} value={entry.confidence} />
+              <DetailItem label={t('watchlist.drawer.lastUpdated')} value={fmtDate(entry.timestamp)} />
             </div>
           </div>
 
           {/* Source */}
           <div className="rounded-lg border p-3" style={{ borderColor: 'var(--dash-border)' }}>
-            <div className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide mb-1.5">Source</div>
+            <div className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide mb-1.5">{t('watchlist.drawer.source')}</div>
             <div className="flex items-center gap-2">
               <FileText className="w-3.5 h-3.5 text-[var(--dash-text-4)]" />
               <span className="text-sm text-[var(--dash-text-2)]">{entry.source}</span>
@@ -679,7 +706,7 @@ function DetailDrawer({ alert, entry, onClose, onStatusChange }: {
           {/* Related entities with same asset */}
           {relatedEntries.length > 0 && (
             <div className="rounded-lg border p-3" style={{ borderColor: 'var(--dash-border)' }}>
-              <div className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide mb-2">Related Entities — Same Asset</div>
+              <div className="text-xs text-[var(--dash-text-4)] font-medium uppercase tracking-wide mb-2">{t('watchlist.drawer.relatedEntities')}</div>
               <div className="space-y-2">
                 {relatedEntries.map(re => {
                   const reEntity = watchedEntities.find(e => e.id === re.entityId);
@@ -702,13 +729,13 @@ function DetailDrawer({ alert, entry, onClose, onStatusChange }: {
           {/* Actions */}
           <div className="flex gap-2">
             <Button size="sm" onClick={() => { onStatusChange(alert.id, 'reviewed'); onClose(); }} className="text-xs bg-green-600 hover:bg-green-700 text-white flex-1">
-              <CheckCircle2 className="w-3 h-3 mr-1" /> Mark Reviewed
+              <CheckCircle2 className="w-3 h-3 mr-1" /> {t('watchlist.alerts.markReviewed')}
             </Button>
             <Button size="sm" variant="outline" onClick={() => { onStatusChange(alert.id, 'snoozed'); onClose(); }} className="text-xs flex-1">
-              <BellOff className="w-3 h-3 mr-1" /> Snooze
+              <BellOff className="w-3 h-3 mr-1" /> {t('watchlist.alerts.snooze')}
             </Button>
             <Button size="sm" variant="outline" onClick={() => { onStatusChange(alert.id, 'dismissed'); onClose(); }} className="text-xs text-red-500 border-red-500/30 hover:bg-red-500/10">
-              <X className="w-3 h-3 mr-1" /> Dismiss
+              <X className="w-3 h-3 mr-1" /> {t('watchlist.alerts.dismiss')}
             </Button>
           </div>
         </div>
@@ -720,12 +747,13 @@ function DetailDrawer({ alert, entry, onClose, onStatusChange }: {
 // ── Small Components ──
 
 function ConfidenceBadge({ confidence }: { confidence: 'high' | 'medium' | 'low' }) {
+  const t = useT();
   const colors = {
     high: 'bg-green-500/10 text-green-600 dark:text-green-400',
     medium: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
     low: 'bg-gray-500/10 text-[var(--dash-text-4)]',
   };
-  return <span className={`text-xs px-1.5 py-0.5 rounded capitalize ${colors[confidence]}`}>{confidence}</span>;
+  return <span className={`text-xs px-1.5 py-0.5 rounded ${colors[confidence]}`}>{t(`watchlist.filters.${confidence}`)}</span>;
 }
 
 function StatusDot({ status }: { status: string }) {
